@@ -9,6 +9,7 @@ import android.view.MenuItem;
 import com.appify.jaedgroup.fragments.ContactUsFragment;
 import com.appify.jaedgroup.fragments.InvestmentFragment;
 import com.appify.jaedgroup.fragments.RealEstateFragment;
+import com.appify.jaedgroup.fragments.ViewTransactionsFragment;
 import com.appify.jaedgroup.model.Estate;
 import com.appify.jaedgroup.utils.Constants;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
@@ -26,7 +27,8 @@ import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentTransaction;
 
-public class MainActivity extends AppCompatActivity implements RealEstateFragment.OnFragmentRealEstateListener {
+public class MainActivity extends AppCompatActivity implements RealEstateFragment.OnFragmentRealEstateListener,
+InvestmentFragment.OnFragmentInteractionListener{
     private BottomNavigationView bottomNavBar;
     private Fragment fragment;
     private FragmentManager manager;
@@ -45,17 +47,24 @@ public class MainActivity extends AppCompatActivity implements RealEstateFragmen
                 switch(menuItem.getItemId()) {
                     case R.id.investment:
                         fragment = new InvestmentFragment();
+                        menuItem.setChecked(true);
                         break;
                     case R.id.real_estate:
                         fragment = new RealEstateFragment();
+                        menuItem.setCheckable(true);
+                        break;
+                    case R.id.transactions:
+                        fragment = new ViewTransactionsFragment();
+                        menuItem.setChecked(true);
                         break;
                     case R.id.contact_us:
+                        menuItem.setChecked(true);
                         fragment = new ContactUsFragment();
                         break;
                 }
                 FragmentTransaction transaction = manager.beginTransaction();
                 transaction.replace(R.id.container, fragment).commit();
-                return false;
+                return true;
             }
         });
     }
@@ -98,5 +107,16 @@ public class MainActivity extends AppCompatActivity implements RealEstateFragmen
         Intent intent = new Intent(this, ViewEstateActivity.class);
         intent.putExtra(Constants.ESTATE_EXTRA, estate);
         startActivity(intent);
+    }
+
+    @Override
+    public void onNewInvestmentClick() {
+        Intent intent = new Intent(this, NewInvestmentActivity.class);
+        startActivity(intent);
+    }
+
+    @Override
+    public void onViewInvestmentClick() {
+
     }
 }

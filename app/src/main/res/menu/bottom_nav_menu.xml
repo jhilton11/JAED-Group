@@ -12,6 +12,11 @@
         android:icon="@drawable/ic_real_estate"/>
 
     <item
+        android:id="@+id/transactions"
+        android:title="Transactions"
+        android:icon="@drawable/ic_contact_us"/>
+
+    <item
         android:id="@+id/contact_us"
         android:title="Contact Us"
         android:icon="@drawable/ic_contact_us"/>

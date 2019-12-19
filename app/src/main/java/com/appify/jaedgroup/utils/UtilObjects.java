@@ -1,6 +1,8 @@
 package com.appify.jaedgroup.utils;
 
+import android.app.AlertDialog;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.text.Layout;
@@ -34,5 +36,18 @@ public final class UtilObjects {
             return true;
         }
         return false;
+    }
+
+    public static void displayAlertDialog(Context context, String title, String msg) {
+        AlertDialog dialog = new AlertDialog.Builder(context)
+                .setTitle(title)
+                .setMessage(msg)
+                .setPositiveButton("Ok", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialogInterface, int i) {
+                        dialogInterface.dismiss();
+                    }
+                })
+                .show();
     }
 }

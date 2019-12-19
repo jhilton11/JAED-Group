@@ -1,5 +1,6 @@
 package com.appify.jaedgroup.fragments;
 
+import android.app.ProgressDialog;
 import android.content.Context;
 import android.net.Uri;
 import android.os.Bundle;
@@ -7,6 +8,7 @@ import android.os.Bundle;
 import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.GridLayoutManager;
+import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import android.util.Log;
@@ -33,6 +35,7 @@ import java.util.ArrayList;
  */
 public class RealEstateFragment extends Fragment {
     private RecyclerView recyclerView;
+    private ProgressDialog dialog;
 
     private OnFragmentRealEstateListener mListener;
     private DatabaseReference estateRef;
@@ -51,8 +54,9 @@ public class RealEstateFragment extends Fragment {
 
         estateRef = FirebaseDatabase.getInstance().getReference().child("Estates");
 
+        dialog = new ProgressDialog(getContext());
         recyclerView = view.findViewById(R.id.recyclerview);
-        recyclerView.setLayoutManager(new GridLayoutManager(getActivity(), 1));
+        recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
         loadData();
 
         return view;
@@ -91,8 +95,10 @@ public class RealEstateFragment extends Fragment {
     }
 
     private void loadData() {
+        Log.d("msg", "Trying to load data");
+        dialog.show();
         estateArrayList = new ArrayList<>();
-        estateRef.addListenerForSingleValueEvent(new ValueEventListener() {
+        estateRef.addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                 for (DataSnapshot snapshot: dataSnapshot.getChildren()) {
@@ -102,6 +108,7 @@ public class RealEstateFragment extends Fragment {
                 Log.d("msg", estateArrayList.size()+" estates discovered");
                 EstateRecyclerAdapter adapter = new EstateRecyclerAdapter(estateArrayList, mListener);
                 recyclerView.setAdapter(adapter);
+                dialog.dismiss();
             }
 
             @Override

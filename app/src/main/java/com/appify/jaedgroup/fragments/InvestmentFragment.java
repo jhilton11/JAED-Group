@@ -1,17 +1,28 @@
 package com.appify.jaedgroup.fragments;
 
 import android.content.Context;
-import android.net.Uri;
 import android.os.Bundle;
 
+import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
-import androidx.recyclerview.widget.RecyclerView;
 
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
+import android.widget.ImageView;
 
 import com.appify.jaedgroup.R;
+import com.bumptech.glide.Glide;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
+import com.synnapps.carouselview.CarouselView;
+import com.synnapps.carouselview.ImageListener;
+
+import java.util.ArrayList;
 
 /**
  * A simple {@link Fragment} subclass.
@@ -21,7 +32,8 @@ import com.appify.jaedgroup.R;
  */
 public class InvestmentFragment extends Fragment {
 
-    private RecyclerView recyclerView;
+    private CarouselView carouselView;
+    private Button newInvestmentBtn, viewInvestmentsBtn;
 
     private OnFragmentInteractionListener mListener;
 
@@ -36,14 +48,27 @@ public class InvestmentFragment extends Fragment {
         // Inflate the layout for this fragment
 
         View view = inflater.inflate(R.layout.fragment_investment, container, false);
-        return view;
-    }
 
-    // TODO: Rename method, update argument and hook method into UI event
-    public void onButtonPressed(Uri uri) {
-        if (mListener != null) {
-            mListener.onFragmentInteraction(uri);
-        }
+        carouselView = view.findViewById(R.id.carousel_view);
+
+        newInvestmentBtn = view.findViewById(R.id.new_investment_btn);
+        viewInvestmentsBtn = view.findViewById(R.id.view_investments_btn);
+
+        newInvestmentBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                addNewInvestment();
+            }
+        });
+
+        viewInvestmentsBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                viewInvestments();
+            }
+        });
+
+        return view;
     }
 
     @Override
@@ -75,6 +100,43 @@ public class InvestmentFragment extends Fragment {
      */
     public interface OnFragmentInteractionListener {
         // TODO: Update argument type and name
-        void onFragmentInteraction(Uri uri);
+        void onNewInvestmentClick();
+
+        void onViewInvestmentClick();
+    }
+
+    //TODO: Write code for loading the images into the carousel
+    private void loadCarouselImages() {
+        final ArrayList<String> imageUrls = new ArrayList<>();
+        DatabaseReference imageRef = FirebaseDatabase.getInstance().getReference().child("CarouselImages");
+        imageRef.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                for (DataSnapshot snapshot: dataSnapshot.getChildren()) {
+                    String imgUrl = snapshot.getValue(String.class);
+                    imageUrls.add(imgUrl);
+                }
+
+                carouselView.setImageListener(new ImageListener() {
+                    @Override
+                    public void setImageForPosition(int position, ImageView imageView) {
+                        Glide.with(getContext()).load(imageUrls.get(position)).into(imageView);
+                    }
+                });
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError databaseError) {
+
+            }
+        });
+    }
+
+    private void addNewInvestment() {
+        mListener.onNewInvestmentClick();
+    }
+
+    private void viewInvestments() {
+        mListener.onViewInvestmentClick();
     }
 }

@@ -44,6 +44,7 @@ public class EstateRecyclerAdapter extends RecyclerView.Adapter<EstateRecyclerAd
         final Estate estate = estateArrayList.get(position);
 
         holder.estateName.setText(estate.getName());
+        holder.estateAddress.setText(estate.getLocation());
         Glide.with(context).load(estate.getImgUrl()).into(holder.imageView);
         Log.d("msg", "added item "+position);
 
@@ -65,10 +66,12 @@ public class EstateRecyclerAdapter extends RecyclerView.Adapter<EstateRecyclerAd
     public static class Holder extends RecyclerView.ViewHolder {
         ImageView imageView;
         TextView estateName;
+        TextView estateAddress;
         public Holder(@NonNull View itemView) {
             super(itemView);
             imageView = itemView.findViewById(R.id.estate_image);
             estateName = itemView.findViewById(R.id.estate_name);
+            estateAddress = itemView.findViewById(R.id.estate_address);
         }
     }
 }

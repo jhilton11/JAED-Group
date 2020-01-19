@@ -14,16 +14,12 @@ import android.widget.EditText;
 import android.widget.ImageView;
 
 import com.appify.jaedgroup.utils.Constants;
-import com.appify.jaedgroup.utils.UtilObjects;
-import com.bumptech.glide.util.Util;
+import com.appify.jaedgroup.utils.tasks;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
-import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.UploadTask;
-
-import java.io.File;
 
 public class EditProfileActivity extends AppCompatActivity {
     private EditText nameET;
@@ -64,10 +60,10 @@ public class EditProfileActivity extends AppCompatActivity {
         updateBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                if (UtilObjects.checkNetworkStatus(EditProfileActivity.this)) {
+                if (tasks.checkNetworkStatus(EditProfileActivity.this)) {
                     updateProfile();
                 } else {
-                    UtilObjects.makeSnackbar(layout, "Cannot update provide because there is no network");
+                    tasks.makeSnackbar(layout, "Cannot update provide because there is no network");
                 }
             }
         });

@@ -6,15 +6,22 @@ import co.paystack.android.PaystackSdk;
 import co.paystack.android.Transaction;
 import co.paystack.android.model.Card;
 import co.paystack.android.model.Charge;
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
 
 import android.app.ProgressDialog;
+import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.appify.jaedgroup.services.PaystackService;
+import com.appify.jaedgroup.utils.RetrofitInstance;
 import com.craftman.cardform.CardForm;
 import com.craftman.cardform.OnPayBtnClickListner;
 
@@ -87,7 +94,8 @@ public class CardPaymentActivity extends AppCompatActivity {
             @Override
             public void onSuccess(Transaction transaction) {
                 //TODO: Send Payment reference to the server as transaction is successful;
-                new VerifyOnServer().execute(transaction.getReference());
+                //new VerifyOnServer().execute(transaction.getReference());
+                verify(transaction.getReference());
                 //TODO: Display transaction successful and exit to new activity
                 Toast.makeText(CardPaymentActivity.this, "Transaction successful", Toast.LENGTH_SHORT).show();
             }
@@ -116,6 +124,28 @@ public class CardPaymentActivity extends AppCompatActivity {
         performCharge(pCard);
     }
 
+    private void verify(final String reference) {
+        PaystackService service = RetrofitInstance.getRetrofitInstance().create(PaystackService.class);
+
+        Call<String> call = service.getJSONString(reference);
+
+        call.enqueue(new Callback<String>() {
+            @Override
+            public void onResponse(Call<String> call, Response<String> response) {
+                if (dialog.isShowing()) {
+                    dialog.dismiss();
+                }
+
+                Log.d("tag", "JSON String:" + response);
+            }
+
+            @Override
+            public void onFailure(Call<String> call, Throwable t) {
+                Toast.makeText(CardPaymentActivity.this, "Error: "+t.getMessage(), Toast.LENGTH_SHORT).show();
+            }
+        });
+    }
+
     private class VerifyOnServer extends AsyncTask<String, Void, String> {
         private String reference;
         private String error;
@@ -126,6 +156,8 @@ public class CardPaymentActivity extends AppCompatActivity {
             if (result != null) {
                 Toast.makeText(CardPaymentActivity.this, "Congrats payment is successful", Toast.LENGTH_SHORT).show();
                 dialog.dismiss();
+                Intent intent = new Intent(CardPaymentActivity.this, TransactionResultActivity.class);
+                startActivity(intent);
             } else {
                 Toast.makeText(CardPaymentActivity.this, "Sorry payment failed", Toast.LENGTH_SHORT).show();
                 dialog.dismiss();

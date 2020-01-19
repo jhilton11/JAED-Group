@@ -2,12 +2,11 @@ package com.appify.jaedgroup.fragments;
 
 import android.app.ProgressDialog;
 import android.content.Context;
-import android.net.Uri;
 import android.os.Bundle;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
-import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -15,15 +14,27 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.TextView;
 
+import com.appify.jaedgroup.MainActivity;
 import com.appify.jaedgroup.R;
 import com.appify.jaedgroup.model.Estate;
 import com.appify.jaedgroup.recyclerAdapters.EstateRecyclerAdapter;
+import com.appify.jaedgroup.utils.tasks;
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
+import com.google.firebase.firestore.CollectionReference;
+import com.google.firebase.firestore.DocumentReference;
+import com.google.firebase.firestore.DocumentSnapshot;
+import com.google.firebase.firestore.EventListener;
+import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.FirebaseFirestoreException;
+import com.google.firebase.firestore.QuerySnapshot;
 
 import java.util.ArrayList;
 
@@ -36,15 +47,11 @@ import java.util.ArrayList;
 public class RealEstateFragment extends Fragment {
     private RecyclerView recyclerView;
     private ProgressDialog dialog;
+    private TextView connectionStatusTv;
 
     private OnFragmentRealEstateListener mListener;
-    private DatabaseReference estateRef;
+    private CollectionReference estateRef;
     private ArrayList<Estate> estateArrayList;
-
-    public RealEstateFragment() {
-        // Required empty public constructor
-    }
-
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -52,11 +59,13 @@ public class RealEstateFragment extends Fragment {
         // Inflate the layout for this fragment
         View view = inflater.inflate(R.layout.fragment_real_estate, container, false);
 
-        estateRef = FirebaseDatabase.getInstance().getReference().child("Estates");
+        estateRef = FirebaseFirestore.getInstance().collection("estates");
 
+        connectionStatusTv = view.findViewById(R.id.connection_status_tv);
         dialog = new ProgressDialog(getContext());
         recyclerView = view.findViewById(R.id.recyclerview);
         recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
+
         loadData();
 
         return view;
@@ -69,7 +78,7 @@ public class RealEstateFragment extends Fragment {
             mListener = (OnFragmentRealEstateListener) context;
         } else {
             throw new RuntimeException(context.toString()
-                    + " must implement OnFragmentInteractionListener");
+                    + " must implement OnTransactionClickListener");
         }
     }
 
@@ -95,27 +104,27 @@ public class RealEstateFragment extends Fragment {
     }
 
     private void loadData() {
-        Log.d("msg", "Trying to load data");
-        dialog.show();
-        estateArrayList = new ArrayList<>();
-        estateRef.addValueEventListener(new ValueEventListener() {
-            @Override
-            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                for (DataSnapshot snapshot: dataSnapshot.getChildren()) {
-                    Estate estate = snapshot.getValue(Estate.class);
-                    estateArrayList.add(estate);
+        if (tasks.checkNetworkStatus(getContext())) {
+            estateArrayList = new ArrayList<>();
+            connectionStatusTv.setVisibility(View.GONE);
+            estateRef.addSnapshotListener(new EventListener<QuerySnapshot>() {
+                @Override
+                public void onEvent(@Nullable QuerySnapshot queryDocumentSnapshots, @Nullable FirebaseFirestoreException e) {
+                    for (DocumentSnapshot snapshot: queryDocumentSnapshots.getDocuments()) {
+                        Estate estate = snapshot.toObject(Estate.class);
+                        estateArrayList.add(estate);
+                    }
+                    Log.d("msg", estateArrayList.size()+" estates discovered");
+                    EstateRecyclerAdapter adapter = new EstateRecyclerAdapter(estateArrayList, mListener);
+                    recyclerView.setAdapter(adapter);
+
+                    if (dialog.isShowing()) {
+                        dialog.dismiss();
+                    }
                 }
-                Log.d("msg", estateArrayList.size()+" estates discovered");
-                EstateRecyclerAdapter adapter = new EstateRecyclerAdapter(estateArrayList, mListener);
-                recyclerView.setAdapter(adapter);
-                dialog.dismiss();
-            }
-
-            @Override
-            public void onCancelled(@NonNull DatabaseError databaseError) {
-
-            }
-        });
-
+            });
+        } else {
+            connectionStatusTv.setVisibility(View.VISIBLE);
+        }
     }
 }

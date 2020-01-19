@@ -2,12 +2,12 @@ package com.appify.jaedgroup;
 
 import androidx.appcompat.app.AppCompatActivity;
 
+import android.content.Intent;
 import android.os.Bundle;
-import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 
-import com.appify.jaedgroup.utils.UtilObjects;
+import com.appify.jaedgroup.utils.tasks;
 
 public class NewInvestmentActivity extends AppCompatActivity {
     private EditText nameEt, ageEt, phoneNoEt, addressEt, emailEt;
@@ -20,7 +20,7 @@ public class NewInvestmentActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_new_investment);
 
-        UtilObjects.displayAlertDialog(this, "Disclaimer", "This is a disclaimer");
+        tasks.displayAlertDialog(this, "Disclaimer", "This is a disclaimer");
 
 //        proceedBtn.setOnClickListener(new View.OnClickListener() {
 //            @Override
@@ -31,6 +31,7 @@ public class NewInvestmentActivity extends AppCompatActivity {
     }
 
     private void proceed(){
-
+        Intent intent = new Intent();
+        startActivity(intent);
     }
 }

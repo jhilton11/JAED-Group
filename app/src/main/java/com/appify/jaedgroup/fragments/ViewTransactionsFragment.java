@@ -5,10 +5,14 @@ import android.net.Uri;
 import android.os.Bundle;
 
 import androidx.fragment.app.Fragment;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
+import co.paystack.android.Transaction;
 
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Toast;
 
 import com.appify.jaedgroup.R;
 import com.google.android.material.tabs.TabLayout;
@@ -16,14 +20,15 @@ import com.google.android.material.tabs.TabLayout;
 /**
  * A fragment with a Google +1 button.
  * Activities that contain this fragment must implement the
- * {@link ViewTransactionsFragment.OnFragmentInteractionListener} interface
+ * {@link OnTransactionClickListener} interface
  * to handle interaction events.
  */
 public class ViewTransactionsFragment extends Fragment {
 
-    private OnFragmentInteractionListener mListener;
+    private OnTransactionClickListener mListener;
 
     private TabLayout tabLayout;
+    private RecyclerView recyclerView;
 
     public ViewTransactionsFragment() {
         // Required empty public constructor
@@ -36,7 +41,33 @@ public class ViewTransactionsFragment extends Fragment {
         // Inflate the layout for this fragment
         View view = inflater.inflate(R.layout.fragment_view_transactions, container, false);
 
-        //tabLayout = view.findViewById(R.id.)
+        tabLayout = view.findViewById(R.id.tabLayout);
+        tabLayout.addTab(tabLayout.newTab().setText("Estates"));
+        tabLayout.addTab(tabLayout.newTab().setText("Investments"));
+
+        recyclerView = view.findViewById(R.id.recyclerview);
+        recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
+
+        tabLayout.setOnTabSelectedListener(new TabLayout.OnTabSelectedListener() {
+            @Override
+            public void onTabSelected(TabLayout.Tab tab) {
+                if (tab.getText().equals("Estates")) {
+                    loadEstateTransactions();
+                } else {
+                    loadInvestmentTransactions();
+                }
+            }
+
+            @Override
+            public void onTabUnselected(TabLayout.Tab tab) {
+
+            }
+
+            @Override
+            public void onTabReselected(TabLayout.Tab tab) {
+
+            }
+        });
 
         return view;
     }
@@ -46,21 +77,14 @@ public class ViewTransactionsFragment extends Fragment {
         super.onResume();
     }
 
-    // TODO: Rename method, update argument and hook method into UI event
-    public void onButtonPressed(Uri uri) {
-        if (mListener != null) {
-            mListener.onTransactionsClick(uri);
-        }
-    }
-
     @Override
     public void onAttach(Context context) {
         super.onAttach(context);
-        if (context instanceof OnFragmentInteractionListener) {
-            mListener = (OnFragmentInteractionListener) context;
+        if (context instanceof OnTransactionClickListener) {
+            mListener = (OnTransactionClickListener) context;
         } else {
             throw new RuntimeException(context.toString()
-                    + " must implement OnFragmentInteractionListener");
+                    + " must implement OnTransactionClickListener");
         }
     }
 
@@ -70,6 +94,13 @@ public class ViewTransactionsFragment extends Fragment {
         mListener = null;
     }
 
+    private void loadEstateTransactions() {
+        Toast.makeText(getContext(), "Loaded estates", Toast.LENGTH_SHORT).show();
+    }
+
+    private void loadInvestmentTransactions() {
+        Toast.makeText(getContext(), "Loaded investments", Toast.LENGTH_SHORT).show();
+    }
     /**
      * This interface must be implemented by activities that contain this
      * fragment to allow an interaction in this fragment to be communicated
@@ -80,9 +111,9 @@ public class ViewTransactionsFragment extends Fragment {
      * "http://developer.android.com/training/basics/fragments/communicating.html"
      * >Communicating with Other Fragments</a> for more information.
      */
-    public interface OnFragmentInteractionListener {
+    public interface OnTransactionClickListener {
         // TODO: Update argument type and name
-        void onTransactionsClick(Uri uri);
+        void onTransactionsClick(Transaction transaction);
     }
 
 }

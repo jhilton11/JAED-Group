@@ -18,7 +18,7 @@ import android.widget.Toast;
 
 import com.appify.jaedgroup.R;
 import com.appify.jaedgroup.model.Message;
-import com.appify.jaedgroup.utils.UtilObjects;
+import com.appify.jaedgroup.utils.tasks;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
@@ -78,10 +78,10 @@ public class ContactUsFragment extends Fragment {
         sendBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                if (UtilObjects.checkNetworkStatus(getContext())) {
+                if (tasks.checkNetworkStatus(getContext())) {
                     sendMessage();
                 } else {
-                    UtilObjects.makeSnackbar(layout,"Phone not connect to Internet. Pls connect and try again");
+                    tasks.makeSnackbar(layout,"Phone not connect to Internet. Pls connect and try again");
                 }
             }
         });
@@ -89,21 +89,14 @@ public class ContactUsFragment extends Fragment {
         return view;
     }
 
-    // TODO: Rename method, update argument and hook method into UI event
-    public void onButtonPressed(Uri uri) {
-        if (mListener != null) {
-            mListener.onFragmentInteraction(uri);
-        }
-    }
-
     @Override
     public void onAttach(Context context) {
         super.onAttach(context);
-//        if (context instanceof OnFragmentInteractionListener) {
-//            mListener = (OnFragmentInteractionListener) context;
+//        if (context instanceof OnTransactionClickListener) {
+//            mListener = (OnTransactionClickListener) context;
 //        } else {
 //            throw new RuntimeException(context.toString()
-//                    + " must implement OnFragmentInteractionListener");
+//                    + " must implement OnTransactionClickListener");
 //        }
   }
 
@@ -113,16 +106,6 @@ public class ContactUsFragment extends Fragment {
         mListener = null;
     }
 
-    /**
-     * This interface must be implemented by activities that contain this
-     * fragment to allow an interaction in this fragment to be communicated
-     * to the activity and potentially other fragments contained in that
-     * activity.
-     * <p>
-     * See the Android Training lesson <a href=
-     * "http://developer.android.com/training/basics/fragments/communicating.html"
-     * >Communicating with Other Fragments</a> for more information.
-     */
     public interface OnFragmentInteractionListener {
         // TODO: Update argument type and name
         void onFragmentInteraction(Uri uri);

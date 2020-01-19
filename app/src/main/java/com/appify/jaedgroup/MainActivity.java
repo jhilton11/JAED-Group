@@ -1,6 +1,7 @@
 package com.appify.jaedgroup;
 
 import android.content.Intent;
+import android.net.Uri;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -22,16 +23,19 @@ import java.util.List;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentTransaction;
+import co.paystack.android.Transaction;
 
 public class MainActivity extends AppCompatActivity implements RealEstateFragment.OnFragmentRealEstateListener,
-InvestmentFragment.OnFragmentInteractionListener{
+InvestmentFragment.OnFragmentInteractionListener, ViewTransactionsFragment.OnTransactionClickListener {
     private BottomNavigationView bottomNavBar;
     private Fragment fragment;
     private FragmentManager manager;
+    private FragmentTransaction transaction;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -48,21 +52,25 @@ InvestmentFragment.OnFragmentInteractionListener{
                     case R.id.investment:
                         fragment = new InvestmentFragment();
                         menuItem.setChecked(true);
+                        getSupportActionBar().setTitle("Investment");
                         break;
                     case R.id.real_estate:
                         fragment = new RealEstateFragment();
                         menuItem.setCheckable(true);
+                        getSupportActionBar().setTitle("Real Estate");
                         break;
                     case R.id.transactions:
                         fragment = new ViewTransactionsFragment();
                         menuItem.setChecked(true);
+                        getSupportActionBar().setTitle("Transaction History");
                         break;
                     case R.id.contact_us:
                         menuItem.setChecked(true);
                         fragment = new ContactUsFragment();
+                        getSupportActionBar().setTitle("Contact us");
                         break;
                 }
-                FragmentTransaction transaction = manager.beginTransaction();
+                transaction = manager.beginTransaction();
                 transaction.replace(R.id.container, fragment).commit();
                 return true;
             }
@@ -117,6 +125,13 @@ InvestmentFragment.OnFragmentInteractionListener{
 
     @Override
     public void onViewInvestmentClick() {
+        Fragment fragment = new ViewTransactionsFragment();
+        transaction = manager.beginTransaction();
+        transaction.replace(R.id.container, fragment).commit();
+    }
 
+    @Override
+    public void onTransactionsClick(Transaction transaction) {
+        //transaction.
     }
 }

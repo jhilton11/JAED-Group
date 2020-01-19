@@ -1,6 +1,5 @@
 package com.appify.jaedgroup;
 
-import android.app.ProgressDialog;
 import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
@@ -10,7 +9,7 @@ import android.widget.EditText;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
-import com.appify.jaedgroup.utils.UtilObjects;
+import com.appify.jaedgroup.utils.tasks;
 import com.facebook.AccessToken;
 import com.facebook.CallbackManager;
 import com.facebook.FacebookCallback;
@@ -217,10 +216,10 @@ public class LoginActivity extends AppCompatActivity {
 
     private boolean checkUsernameAndPassword(String username, String password) {
         if (username.length()<1 || password.length()<1) {
-            UtilObjects.makeSnackbar(layout, "Username or password field is empty");
+            tasks.makeSnackbar(layout, "Username or password field is empty");
             return false;
-        } else if (!UtilObjects.validateEmail(username)) {
-            UtilObjects.makeSnackbar(layout, "Email address is not valid");
+        } else if (!tasks.validateEmail(username)) {
+            tasks.makeSnackbar(layout, "Email address is not valid");
             return false;
         }
         return true;

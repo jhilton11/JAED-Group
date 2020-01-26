@@ -1,5 +1,6 @@
 package com.appify.jaedgroup;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import co.paystack.android.Paystack;
 import co.paystack.android.PaystackSdk;
@@ -20,10 +21,16 @@ import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.appify.jaedgroup.model.EstateTransaction;
 import com.appify.jaedgroup.services.PaystackService;
 import com.appify.jaedgroup.utils.RetrofitInstance;
 import com.craftman.cardform.CardForm;
 import com.craftman.cardform.OnPayBtnClickListner;
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.Task;
+import com.google.firebase.firestore.CollectionReference;
+import com.google.firebase.firestore.DocumentReference;
+import com.google.firebase.firestore.FirebaseFirestore;
 
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
@@ -33,8 +40,9 @@ public class CardPaymentActivity extends AppCompatActivity {
     private CardForm cardForm;
     private ProgressDialog dialog;
     private co.paystack.android.model.Card pCard;
+    private EstateTransaction transaction;
 
-    private String name, age, address, phoneNo;
+    private int amount;
 
     private static final String backend_url = "https://jaed-test-app.herokuapp.com";
 
@@ -43,41 +51,42 @@ public class CardPaymentActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_card_payment);
 
-        name = getIntent().getStringExtra("name");
-        age = getIntent().getStringExtra("age");
-        address = getIntent().getStringExtra("address");
-        phoneNo = getIntent().getStringExtra("phoneNo");
+        transaction = (EstateTransaction) getIntent().getSerializableExtra("estateTransaction");
+        if (transaction != null) {
+            amount = transaction.getAmountPaid();
+        }
 
         PaystackSdk.initialize(getApplicationContext());
 
         cardForm = findViewById(R.id.card_form);
         dialog = new ProgressDialog(this);
 
-        TextView amount = (TextView) (cardForm.getRootView().findViewById(R.id.payment_amount));
-        amount.setText("N500,000");
+        TextView amountTv = (TextView) (cardForm.getRootView().findViewById(R.id.payment_amount));
+        amountTv.setText(String.valueOf(amount));
 
         Button amtBtn = (Button) (cardForm.getRootView().findViewById(R.id.btn_pay));
-        amtBtn.setText("N500,000");
+        amtBtn.setText("Pay N" + String.valueOf(amount));
 
-        amtBtn.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                performTest();
-            }
-        });
-
-//        cardForm.setPayBtnClickListner(new OnPayBtnClickListner() {
+//        amtBtn.setOnClickListener(new View.OnClickListener() {
 //            @Override
-//            public void onClick(Card card) {
+//            public void onClick(View view) {
+//                performTest();
+//            }
+//        });
+
+        cardForm.setPayBtnClickListner(new OnPayBtnClickListner() {
+            @Override
+            public void onClick(com.craftman.cardform.Card card) {
 //                String cardNumber = card.getNumber();
 //                int expiryMonth = card.getExpMonth();
 //                int expiryYear = card.getExpYear();
 //                String cvv = card.getCVC();
 //
 //                pCard = new co.paystack.android.model.Card(cardNumber, expiryMonth, expiryYear, cvv);
-//                performCharge();
-//            }
-//        });
+//                performCharge(pCard);
+                performTest();
+            }
+        });
     }
 
     private void performCharge(Card card) {
@@ -85,8 +94,8 @@ public class CardPaymentActivity extends AppCompatActivity {
         Charge charge = new Charge();
         charge.setCard(card);
         charge.setPlan("");
-        charge.setEmail("scolaguys@yahoo.co.uk");
-        charge.setAmount(4000);
+        charge.setEmail(transaction.getEmail());
+        charge.setAmount(transaction.getAmountPaid());
 
         dialog.show();
 
@@ -156,10 +165,14 @@ public class CardPaymentActivity extends AppCompatActivity {
             if (result != null) {
                 Toast.makeText(CardPaymentActivity.this, "Congrats payment is successful", Toast.LENGTH_SHORT).show();
                 dialog.dismiss();
+                transaction.setTransactionStatus("Successful");
+                sendTransactionToDatabase();
                 Intent intent = new Intent(CardPaymentActivity.this, TransactionResultActivity.class);
                 startActivity(intent);
             } else {
                 Toast.makeText(CardPaymentActivity.this, "Sorry payment failed", Toast.LENGTH_SHORT).show();
+                transaction.setTransactionStatus("Failed");
+                sendTransactionToDatabase();
                 dialog.dismiss();
             }
         }
@@ -182,5 +195,21 @@ public class CardPaymentActivity extends AppCompatActivity {
             }
             return null;
         }
+    }
+
+    private void sendTransactionToDatabase() {
+        DocumentReference docRef = FirebaseFirestore.getInstance().collection("estatetransaction").document();
+        String id = docRef.getId();
+        docRef.set(transaction).addOnCompleteListener(new OnCompleteListener<Void>() {
+            @Override
+            public void onComplete(@NonNull Task<Void> task) {
+                if (task.isSuccessful()) {
+                    Toast.makeText(CardPaymentActivity.this, "Transaction successfully added", Toast.LENGTH_SHORT).show();
+                    Log.d(getClass().getSimpleName(), "Estate successfully added");
+                } else {
+                    Log.d(getClass().getSimpleName(), "Unable to add estate to database");
+                }
+            }
+        });
     }
 }

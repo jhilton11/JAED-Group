@@ -1,6 +1,8 @@
 package com.appify.jaedgroup.model;
 
-public class EstateTransaction {
+import java.io.Serializable;
+
+public class EstateTransaction implements Serializable {
     private String id;
     private String name;
     private String estateId;
@@ -24,13 +26,25 @@ public class EstateTransaction {
     private String userId;
     private String transactionStatus;
 
-    private static EstateTransaction ourInstance = new EstateTransaction();
-
-    public static EstateTransaction getInstance() {
-        return ourInstance;
+    public EstateTransaction() {
     }
 
-    private EstateTransaction() {
+    public EstateTransaction(String name, String estateId, String estateName, String phoneNo, String customerAddress, String dateOfBirth, String occupation, String maritalStatus, String nextOfKin, String nextOfKinPhoneNo, String nextOfKinAddress, String purposeOfLand, boolean willAcceptAlternatePlot, String email, String userId) {
+        this.name = name;
+        this.estateId = estateId;
+        this.estateName = estateName;
+        this.phoneNo = phoneNo;
+        this.customerAddress = customerAddress;
+        this.dateOfBirth = dateOfBirth;
+        this.occupation = occupation;
+        this.maritalStatus = maritalStatus;
+        this.nextOfKin = nextOfKin;
+        this.nextOfKinPhoneNo = nextOfKinPhoneNo;
+        this.nextOfKinAddress = nextOfKinAddress;
+        this.purposeOfLand = purposeOfLand;
+        this.willAcceptAlternatePlot = willAcceptAlternatePlot;
+        this.email = email;
+        this.userId = userId;
     }
 
     public String getId() {
@@ -191,10 +205,6 @@ public class EstateTransaction {
 
     public void setTransactionStatus(String transactionStatus) {
         this.transactionStatus = transactionStatus;
-    }
-
-    public void reset() {
-        ourInstance = new EstateTransaction();
     }
 
     public String getMaritalStatus() {

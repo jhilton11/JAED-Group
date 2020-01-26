@@ -17,6 +17,8 @@ import android.widget.Toast;
 
 import com.appify.jaedgroup.model.EstateTransaction;
 import com.appify.jaedgroup.model.OptionType;
+import com.appify.jaedgroup.utils.Constants;
+import com.appify.jaedgroup.utils.tasks;
 import com.google.firebase.firestore.CollectionReference;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
@@ -39,13 +41,18 @@ public class OrderSummaryActivity extends AppCompatActivity {
     private Map<String, Integer> prices;
     private String id, estateType;
     private int price;
+    private static final String naira = "₦";
+    private EstateTransaction transaction;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_order_summary);
 
-        id = EstateTransaction.getInstance().getEstateId();
+        transaction = (EstateTransaction) getIntent().getSerializableExtra("estateTransaction");
+        if (transaction != null) {
+            id = transaction.getEstateId();
+        }
 
         radioGroup = findViewById(R.id.radioGroup);
         priceTv = findViewById(R.id.price_tv);
@@ -59,10 +66,10 @@ public class OrderSummaryActivity extends AppCompatActivity {
             public void onCheckedChanged(RadioGroup radioGroup, int i) {
                 RadioButton rb = findViewById(i);
                 estateType = rb.getText().toString();
-                EstateTransaction.getInstance().setEstateType(estateType);
+                transaction.setEstateType(estateType);
 
                 price = prices.get(estateType);
-                priceTv.setText("Price: N" + price);
+                priceTv.setText("Price: " + naira + price);
 
                 if (!button.isEnabled()) {
                     button.setEnabled(true);
@@ -90,23 +97,26 @@ public class OrderSummaryActivity extends AppCompatActivity {
     }
 
     private void loadData() {
-        if (true) {
+        if (tasks.checkNetworkStatus(this)) {
             dialog.show();
-            CollectionReference reference = FirebaseFirestore.getInstance().collection("options");
-            reference.whereEqualTo("id", "jrZlc134NNvgHiH1zrEA").orderBy("price", Query.Direction.DESCENDING).addSnapshotListener(new EventListener<QuerySnapshot>() {
+            Query reference = FirebaseFirestore.getInstance().collection("options");
+            reference.whereEqualTo("id", id).orderBy("price", Query.Direction.DESCENDING).addSnapshotListener(new EventListener<QuerySnapshot>() {
                 @Override
                 public void onEvent(@Nullable QuerySnapshot queryDocumentSnapshots, @Nullable FirebaseFirestoreException e) {
-                    if (!queryDocumentSnapshots.isEmpty()) {
+                    if (e==null && !queryDocumentSnapshots.isEmpty()) {
                         prices = new HashMap<>();
                         ArrayList<OptionType> arrayList = new ArrayList<>();
                         for (DocumentSnapshot snapshot: queryDocumentSnapshots.getDocuments()) {
                             OptionType type = snapshot.toObject(OptionType.class);
                             arrayList.add(type);
-                            prices.put(type.getType(), type.getPrice());
+                            prices.put(type.getType() + ":\t" + naira + type.getPrice(), type.getPrice());
                         }
                         populateRadioGroup(arrayList);
                         dialog.dismiss();
                     } else {
+                        if (e!=null) {
+                            Log.d(getClass().getSimpleName(), "error: " + e.getMessage());
+                        }
                         Toast.makeText(OrderSummaryActivity.this, "No data loaded", Toast.LENGTH_SHORT).show();
                         dialog.dismiss();
                     }
@@ -120,14 +130,15 @@ public class OrderSummaryActivity extends AppCompatActivity {
     private void populateRadioGroup(ArrayList<OptionType> types) {
         for (OptionType type: types) {
             RadioButton rb = new RadioButton(this);
-            rb.setText(type.getType());
+            rb.setText(type.getType() + ":\t" + naira + type.getPrice());
             radioGroup.addView(rb);
         }
     }
 
     private void goToPayment() {
+        transaction.setAmountPaid(price);
         Intent intent = new Intent(this, CardPaymentActivity.class);
-        intent.putExtra("price", price);
+        intent.putExtra("estateTransaction", transaction);
         startActivity(intent);
     }
 }

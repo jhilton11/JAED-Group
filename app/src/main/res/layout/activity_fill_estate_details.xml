@@ -1,51 +1,171 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="vertical"
-    android:id="@+id/layout"
-    tools:context=".FillEstateDetailsActivity">
+    xmlns:tools="http://schemas.android.com/tools"
+    android:background="@drawable/background"
+    tools:context=".FillDetailsActivity">
 
-    <EditText
-        android:id="@+id/name_et"
+    <LinearLayout
+        xmlns:tools="http://schemas.android.com/tools"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:inputType="textPersonName"
-        android:hint="Your name"
-        android:layout_marginTop="10dp"
-        android:layout_marginBottom="10dp"/>
+        android:layout_height="match_parent"
+        android:orientation="vertical"
+        android:id="@+id/layout"
+        android:paddingLeft="10dp"
+        android:paddingRight="10dp">
 
-    <EditText
-        android:id="@+id/age_et"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:inputType="number"
-        android:hint="Age"
-        android:layout_marginBottom="10dp"/>
+        <EditText
+            android:id="@+id/name_et"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:inputType="textPersonName"
+            android:hint="Your name"
+            android:background="@drawable/edittext_round_edge_background"
+            android:layout_marginTop="10dp"
+            android:layout_marginBottom="10dp"/>
 
-    <EditText
-        android:id="@+id/phone_no_et"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:inputType="phone"
-        android:hint="Phone Number"
-        android:layout_marginBottom="10dp"/>
+        <EditText
+            android:id="@+id/phone_no_et"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:inputType="phone"
+            android:hint="Phone Number"
+            android:background="@drawable/edittext_round_edge_background"
+            android:layout_marginBottom="10dp"/>
 
-    <EditText
-        android:id="@+id/address_et"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:inputType="textPostalAddress"
-        android:hint="Address"
-        android:layout_marginBottom="10dp"/>
+        <EditText
+            android:id="@+id/address_et"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:inputType="textPostalAddress"
+            android:hint="Address"
+            android:layout_marginBottom="10dp"
+            android:background="@drawable/edittext_round_edge_background"/>
 
-    <Button
-        android:id="@+id/pay_btn"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Pay"
-        android:layout_gravity="right"/>
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Marital status"
+            android:layout_gravity="center"/>
+        <RadioGroup
+            android:id="@+id/maritalStatusBtnGrp"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="10dp"
+            android:orientation="horizontal"
+            android:gravity="center">
+            <RadioButton
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Single"/>
+            <RadioButton
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Married"/>
+        </RadioGroup>
 
-</LinearLayout>
+        <EditText
+            android:id="@+id/occupation_et"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Occupation"
+            android:inputType="textPersonName"
+            android:background="@drawable/edittext_round_edge_background"
+            android:layout_marginBottom="10dp"/>
+
+        <EditText
+            android:id="@+id/dateOfBirth_et"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:inputType="date"
+            android:hint="Date of Birth"
+            android:background="@drawable/edittext_round_edge_background"
+            android:layout_marginBottom="10dp"/>
+
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="2dp"
+            android:background="@android:color/darker_gray"
+            android:padding="5dp"/>
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Choose Purpose of land"
+            android:layout_gravity="center"/>
+        <RadioGroup
+            android:id="@+id/purposeOfLandBtnGrp"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="10dp"
+            android:orientation="horizontal"
+            android:gravity="center">
+            <RadioButton
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Commercial"/>
+            <RadioButton
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Residential"/>
+        </RadioGroup>
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:text="Would accept an alternate location"/>
+        <RadioGroup
+            android:id="@+id/acceptAlternateLandStatusBtnGrp"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="10dp"
+            android:orientation="horizontal"
+            android:gravity="center">
+            <RadioButton
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Yes"/>
+            <RadioButton
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="No"/>
+        </RadioGroup>
+
+        <Spinner
+            android:id="@+id/spinner_et"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"/>
+
+        <EditText
+            android:id="@+id/nextOfKin_et"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:inputType="textPersonName"
+            android:background="@drawable/edittext_round_edge_background"
+            android:hint="Next of kin"
+            android:layout_marginBottom="10dp"/>
+
+        <EditText
+            android:id="@+id/nextOfKin_phone"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:inputType="phone"
+            android:hint="Next of kin phone number"
+            android:background="@drawable/edittext_round_edge_background"
+            android:layout_marginBottom="10dp"/>
+
+        <Button
+            android:id="@+id/pay_btn"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Pay"
+            android:layout_gravity="right"
+            android:textColor="@android:color/white"
+            android:background="@drawable/round_edge_btn"
+            android:layout_marginBottom="10dp"/>
+
+    </LinearLayout>
+
+</ScrollView>

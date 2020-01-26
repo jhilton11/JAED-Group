@@ -13,6 +13,7 @@ import android.os.Bundle;
 import android.view.ContextMenu;
 import android.view.View;
 import android.widget.Button;
+import android.widget.TextView;
 
 import com.appify.jaedgroup.model.Estate;
 import com.appify.jaedgroup.recyclerAdapters.ImagePageAdapter;
@@ -27,8 +28,8 @@ import java.util.ArrayList;
 
 public class ViewEstateActivity extends AppCompatActivity {
     private ViewPager viewPager;
-    private RecyclerView recyclerView;
     private CircleIndicator indicator;
+    private TextView estate_description, estate_address, promo_details;
     private Button payBtn;
 
     private ArrayList<String> estateImages;
@@ -44,19 +45,21 @@ public class ViewEstateActivity extends AppCompatActivity {
         id = estate.getId();
 
         viewPager = findViewById(R.id.view_pager);
-        recyclerView = findViewById(R.id.recyclerview);
         indicator = findViewById(R.id.circular_indicator);
+        estate_address = findViewById(R.id.estate_address);
+        estate_description = findViewById(R.id.estate_description);
+        promo_details = findViewById(R.id.promo_details);
         payBtn = findViewById(R.id.buy_btn);
 
         ImagePageAdapter pageAdapter = new ImagePageAdapter(getImages(), this);
         viewPager.setAdapter(pageAdapter);
         indicator.setViewPager(viewPager);
 
-        recyclerView.setLayoutManager(new LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false));
+        //recyclerView.setLayoutManager(new LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false));
         payBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                buyEstate();
+                buyEstate(estate);
             }
         });
 
@@ -65,7 +68,7 @@ public class ViewEstateActivity extends AppCompatActivity {
         toolbar.setHomeButtonEnabled(true);
         toolbar.setDisplayHomeAsUpEnabled(true);
 
-        //loadData();
+        loadDetails(estate);
     }
 
     @Override
@@ -79,9 +82,16 @@ public class ViewEstateActivity extends AppCompatActivity {
         return super.onSupportNavigateUp();
     }
 
-    private void buyEstate() {
+    private void buyEstate(Estate estate) {
         Intent intent = new Intent(this, FillDetailsActivity.class);
+        intent.putExtra("id", estate.getId());
         startActivity(intent);
+    }
+
+    private void loadDetails(Estate estate) {
+        estate_address.setText(estate.getLocation());
+        estate_description.setText(estate.getDescription());
+        promo_details.setText(estate.getPromoDetails());
     }
 
     private void loadData() {

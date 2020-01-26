@@ -6,6 +6,8 @@
     android:layout_height="match_parent"
     android:id="@+id/layout"
     android:orientation="vertical"
+    android:background="@drawable/background"
+    android:padding="10dp"
     tools:context=".ViewEstateActivity">
 
     <FrameLayout
@@ -22,20 +24,32 @@
             android:layout_gravity="bottom|center_horizontal"/>
     </FrameLayout>
 
-    <androidx.recyclerview.widget.RecyclerView
-        android:id="@+id/recyclerview"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"/>
+    <TextView
+        android:id="@+id/estate_address"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="10dp"/>
 
     <TextView
-        android:layout_width="wrap_content"
+        android:id="@+id/estate_description"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Promo Details"/>
+        android:layout_marginTop="10dp"/>
+
+    <TextView
+        android:id="@+id/promo_details"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Promo Details"
+        android:layout_marginTop="10dp"
+        android:layout_marginBottom="10dp"/>
 
     <Button
         android:id="@+id/buy_btn"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="Buy"
+        android:background="@drawable/round_edge_btn"
+        android:textColor="@android:color/white"
         android:layout_gravity="right"/>
 </LinearLayout>

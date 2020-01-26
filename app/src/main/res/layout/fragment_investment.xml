@@ -4,6 +4,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
+    android:background="@drawable/background"
     tools:context=".fragments.InvestmentFragment">
 
     <!-- TODO: Update blank fragment layout -->
@@ -18,11 +19,19 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginBottom="20dp"
-        android:text="View my investments"/>
+        android:text="View my investments"
+        android:background="@drawable/round_edge_btn"
+        android:textColor="@android:color/white"
+        android:layout_marginRight="20dp"
+        android:layout_marginLeft="20dp"/>
 
     <Button
         android:id="@+id/new_investment_btn"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Click to invest"/>
+        android:text="Click to invest"
+        android:background="@drawable/round_edge_btn"
+        android:textColor="@android:color/white"
+        android:layout_marginRight="20dp"
+        android:layout_marginLeft="20dp"/>
 </LinearLayout>

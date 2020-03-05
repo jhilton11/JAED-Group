@@ -16,7 +16,6 @@ import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.util.Log;
-import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -28,7 +27,6 @@ import com.craftman.cardform.CardForm;
 import com.craftman.cardform.OnPayBtnClickListner;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
-import com.google.firebase.firestore.CollectionReference;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.FirebaseFirestore;
 
@@ -40,7 +38,7 @@ public class CardPaymentActivity extends AppCompatActivity {
     private CardForm cardForm;
     private ProgressDialog dialog;
     private co.paystack.android.model.Card pCard;
-    private EstateTransaction transaction;
+    private EstateTransaction trans;
 
     private int amount;
 
@@ -51,9 +49,9 @@ public class CardPaymentActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_card_payment);
 
-        transaction = (EstateTransaction) getIntent().getSerializableExtra("estateTransaction");
-        if (transaction != null) {
-            amount = transaction.getAmountPaid();
+        trans = (EstateTransaction) getIntent().getSerializableExtra("transaction");
+        if (trans != null) {
+            amount = trans.getAmountPaid();
         }
 
         PaystackSdk.initialize(getApplicationContext());
@@ -65,7 +63,7 @@ public class CardPaymentActivity extends AppCompatActivity {
         amountTv.setText(String.valueOf(amount));
 
         Button amtBtn = (Button) (cardForm.getRootView().findViewById(R.id.btn_pay));
-        amtBtn.setText("Pay N" + String.valueOf(amount));
+        amtBtn.setText("Pay #" + String.valueOf(amount));
 
 //        amtBtn.setOnClickListener(new View.OnClickListener() {
 //            @Override
@@ -94,18 +92,21 @@ public class CardPaymentActivity extends AppCompatActivity {
         Charge charge = new Charge();
         charge.setCard(card);
         charge.setPlan("");
-        charge.setEmail(transaction.getEmail());
-        charge.setAmount(transaction.getAmountPaid());
+        charge.setEmail(trans.getEmail());
+        charge.setAmount(trans.getAmountPaid());
 
         dialog.show();
+        dialog.setCancelable(false);
+        dialog.setMessage("Please wait....Do not attempt to cancel trans");
 
         PaystackSdk.chargeCard(CardPaymentActivity.this, charge, new Paystack.TransactionCallback() {
             @Override
             public void onSuccess(Transaction transaction) {
-                //TODO: Send Payment reference to the server as transaction is successful;
-                //new VerifyOnServer().execute(transaction.getReference());
-                verify(transaction.getReference());
-                //TODO: Display transaction successful and exit to new activity
+                //TODO: Send Payment reference to the server as trans is successful;
+                trans.setReference(transaction.getReference());
+                new VerifyOnServer().execute(transaction.getReference());
+                //verify(trans.getReference());
+                //TODO: Display trans successful and exit to new activity
                 Toast.makeText(CardPaymentActivity.this, "Transaction successful", Toast.LENGTH_SHORT).show();
             }
 
@@ -117,6 +118,7 @@ public class CardPaymentActivity extends AppCompatActivity {
             @Override
             public void onError(Throwable error, Transaction transaction) {
                 //TODO: Handle error details here.
+                trans.setReference(transaction.getReference());
                 dialog.dismiss();
                 Toast.makeText(CardPaymentActivity.this, "Transaction failed. Details:"+error.getMessage(), Toast.LENGTH_SHORT).show();
             }
@@ -143,9 +145,19 @@ public class CardPaymentActivity extends AppCompatActivity {
             public void onResponse(Call<String> call, Response<String> response) {
                 if (dialog.isShowing()) {
                     dialog.dismiss();
+
+                    if (response.isSuccessful()) {
+                        Log.e("Succeeded: ", response.message());
+                        Toast.makeText(CardPaymentActivity.this, "Verification is successful", Toast.LENGTH_SHORT).show();
+                    } else {
+                        dialog.dismiss();
+                        Log.e("Error", response.errorBody().toString());
+                        Toast.makeText(CardPaymentActivity.this, "Verification failed", Toast.LENGTH_SHORT).show();
+                    }
                 }
 
                 Log.d("tag", "JSON String:" + response);
+                Toast.makeText(CardPaymentActivity.this, "Response: "+response, Toast.LENGTH_SHORT).show();
             }
 
             @Override
@@ -165,15 +177,17 @@ public class CardPaymentActivity extends AppCompatActivity {
             if (result != null) {
                 Toast.makeText(CardPaymentActivity.this, "Congrats payment is successful", Toast.LENGTH_SHORT).show();
                 dialog.dismiss();
-                transaction.setTransactionStatus("Successful");
+                trans.setTransactionStatus("Successful");
                 sendTransactionToDatabase();
-                Intent intent = new Intent(CardPaymentActivity.this, TransactionResultActivity.class);
-                startActivity(intent);
             } else {
                 Toast.makeText(CardPaymentActivity.this, "Sorry payment failed", Toast.LENGTH_SHORT).show();
-                transaction.setTransactionStatus("Failed");
+                trans.setTransactionStatus("Failed");
                 sendTransactionToDatabase();
                 dialog.dismiss();
+            }
+
+            if (error != null) {
+                Log.e("Error: ", error);
             }
         }
 
@@ -199,13 +213,13 @@ public class CardPaymentActivity extends AppCompatActivity {
 
     private void sendTransactionToDatabase() {
         DocumentReference docRef = FirebaseFirestore.getInstance().collection("estatetransaction").document();
-        String id = docRef.getId();
-        docRef.set(transaction).addOnCompleteListener(new OnCompleteListener<Void>() {
+        docRef.set(trans).addOnCompleteListener(new OnCompleteListener<Void>() {
             @Override
             public void onComplete(@NonNull Task<Void> task) {
                 if (task.isSuccessful()) {
                     Toast.makeText(CardPaymentActivity.this, "Transaction successfully added", Toast.LENGTH_SHORT).show();
                     Log.d(getClass().getSimpleName(), "Estate successfully added");
+                    startActivity(new Intent(CardPaymentActivity.this, TransactionResultActivity.class));
                 } else {
                     Log.d(getClass().getSimpleName(), "Unable to add estate to database");
                 }

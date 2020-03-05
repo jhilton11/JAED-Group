@@ -44,7 +44,7 @@ public class EstateRecyclerAdapter extends RecyclerView.Adapter<EstateRecyclerAd
         final Estate estate = estateArrayList.get(position);
 
         holder.estateName.setText(estate.getName());
-        holder.estateAddress.setText(estate.getLocation());
+        holder.estateAddress.setText(estate.getAddress());
         Glide.with(context).load(estate.getImgUrl()).into(holder.imageView);
         Log.d("msg", "added item "+position);
 

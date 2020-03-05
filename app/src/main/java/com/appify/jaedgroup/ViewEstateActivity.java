@@ -1,15 +1,14 @@
 package com.appify.jaedgroup;
 
-import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.recyclerview.widget.LinearLayoutManager;
-import androidx.recyclerview.widget.RecyclerView;
 import androidx.viewpager.widget.ViewPager;
 import me.relex.circleindicator.CircleIndicator;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.ContextMenu;
 import android.view.View;
 import android.widget.Button;
@@ -18,11 +17,12 @@ import android.widget.TextView;
 import com.appify.jaedgroup.model.Estate;
 import com.appify.jaedgroup.recyclerAdapters.ImagePageAdapter;
 import com.appify.jaedgroup.utils.Constants;
-import com.google.firebase.database.DataSnapshot;
-import com.google.firebase.database.DatabaseError;
-import com.google.firebase.database.DatabaseReference;
-import com.google.firebase.database.FirebaseDatabase;
-import com.google.firebase.database.ValueEventListener;
+import com.google.firebase.firestore.CollectionReference;
+import com.google.firebase.firestore.DocumentSnapshot;
+import com.google.firebase.firestore.EventListener;
+import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.FirebaseFirestoreException;
+import com.google.firebase.firestore.QuerySnapshot;
 
 import java.util.ArrayList;
 
@@ -33,7 +33,7 @@ public class ViewEstateActivity extends AppCompatActivity {
     private Button payBtn;
 
     private ArrayList<String> estateImages;
-    private DatabaseReference estateRef;
+    private CollectionReference estateRef;
     private String id;
 
     @Override
@@ -51,10 +51,6 @@ public class ViewEstateActivity extends AppCompatActivity {
         promo_details = findViewById(R.id.promo_details);
         payBtn = findViewById(R.id.buy_btn);
 
-        ImagePageAdapter pageAdapter = new ImagePageAdapter(getImages(), this);
-        viewPager.setAdapter(pageAdapter);
-        indicator.setViewPager(viewPager);
-
         //recyclerView.setLayoutManager(new LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false));
         payBtn.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -69,6 +65,7 @@ public class ViewEstateActivity extends AppCompatActivity {
         toolbar.setDisplayHomeAsUpEnabled(true);
 
         loadDetails(estate);
+        loadData();
     }
 
     @Override
@@ -84,45 +81,33 @@ public class ViewEstateActivity extends AppCompatActivity {
 
     private void buyEstate(Estate estate) {
         Intent intent = new Intent(this, FillDetailsActivity.class);
-        intent.putExtra("id", estate.getId());
+        intent.putExtra(Constants.ESTATE_EXTRA, estate);
         startActivity(intent);
     }
 
     private void loadDetails(Estate estate) {
-        estate_address.setText(estate.getLocation());
+        estate_address.setText(estate.getAddress());
+        Log.d("address", estate.getAddress());
         estate_description.setText(estate.getDescription());
         promo_details.setText(estate.getPromoDetails());
     }
 
     private void loadData() {
-        estateImages = new ArrayList<>();
-        estateRef = FirebaseDatabase.getInstance().getReference().child("EstateImages").child(id);
+        estateRef = FirebaseFirestore.getInstance().collection("estateImages").document(id).collection("images");
 
-        estateRef.addListenerForSingleValueEvent(new ValueEventListener() {
+        estateRef.addSnapshotListener(new EventListener<QuerySnapshot>() {
             @Override
-            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                for (DataSnapshot snapshot: dataSnapshot.getChildren()) {
-                    String imgUrl = (String) snapshot.getValue();
+            public void onEvent(@Nullable QuerySnapshot queryDocumentSnapshots, @Nullable FirebaseFirestoreException e) {
+                estateImages = new ArrayList<>();
+                for (DocumentSnapshot snapshot: queryDocumentSnapshots.getDocuments()) {
+                    String imgUrl = snapshot.getString("id");
                     estateImages.add(imgUrl);
+                    Log.d("imgUrl", imgUrl);
                 }
-            }
-
-            @Override
-            public void onCancelled(@NonNull DatabaseError databaseError) {
-
+                ImagePageAdapter pageAdapter = new ImagePageAdapter(estateImages, getApplicationContext());
+                viewPager.setAdapter(pageAdapter);
+                indicator.setViewPager(viewPager);
             }
         });
-    }
-
-    private ArrayList<Integer> getImages() {
-        ArrayList<Integer> images = new ArrayList<>();
-
-        images.add(R.drawable.image_1);
-        images.add(R.drawable.image_2);
-        images.add(R.drawable.image_3);
-        images.add(R.drawable.image_4);
-        images.add(R.drawable.image_5);
-
-        return images;
     }
 }

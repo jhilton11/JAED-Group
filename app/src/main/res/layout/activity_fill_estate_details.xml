@@ -115,7 +115,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center"
-            android:text="Would accept an alternate location"/>
+            android:text="Would accept an alternate address"/>
         <RadioGroup
             android:id="@+id/acceptAlternateLandStatusBtnGrp"
             android:layout_width="match_parent"

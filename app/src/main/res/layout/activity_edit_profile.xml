@@ -40,13 +40,6 @@
         android:hint="Enter your name"/>
 
     <EditText
-        android:id="@+id/email_et"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:inputType="textEmailAddress"
-        android:hint="Email customerAddress"/>
-
-    <EditText
         android:id="@+id/phone_no_et"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"

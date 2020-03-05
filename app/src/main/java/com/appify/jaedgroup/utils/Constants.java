@@ -12,7 +12,7 @@ public final class Constants {
 
     public static String getCurrencySymbol() {//NumberFormat format = NumberFormat.getCurrencyInstance(Locale.);
 
-        String currency = Currency.getInstance(Locale.getDefault()).getSymbol();
+        String currency = "₦";
 
         return currency;
     }

@@ -24,6 +24,11 @@ import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.firestore.CollectionReference;
+import com.google.firebase.firestore.DocumentReference;
+import com.google.firebase.firestore.FirebaseFirestore;
+
+import java.util.UUID;
 
 /**
  * A simple {@link Fragment} subclass.
@@ -33,7 +38,7 @@ import com.google.firebase.database.FirebaseDatabase;
  */
 public class ContactUsFragment extends Fragment {
     private EditText nameEt;
-    private EditText emailEt;
+    private EditText phoneEt;
     private EditText msgEt;
     private Button sendBtn;
     private View layout;
@@ -42,11 +47,6 @@ public class ContactUsFragment extends Fragment {
 
     private OnFragmentInteractionListener mListener;
 
-    public ContactUsFragment() {
-        // Required empty public constructor
-    }
-
-
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
@@ -54,7 +54,7 @@ public class ContactUsFragment extends Fragment {
         View view = inflater.inflate(R.layout.fragment_contact_us, container, false);
 
         nameEt = view.findViewById(R.id.name_et);
-        emailEt = view.findViewById(R.id.email_et);
+        phoneEt = view.findViewById(R.id.email_et);
         msgEt = view.findViewById(R.id.message_et);
         sendBtn = view.findViewById(R.id.send_btn);
         layout = getActivity().findViewById(R.id.layout);
@@ -64,7 +64,7 @@ public class ContactUsFragment extends Fragment {
         Runnable runnable = new Runnable() {
             @Override
             public void run() {
-                if (nameEt.getText().toString().length() < 1 || emailEt.getText().toString().length() < 1
+                if (nameEt.getText().toString().length() < 1 || phoneEt.getText().toString().length() < 1
                 || msgEt.getText().toString().length() < 1) {
                     sendBtn.setEnabled(false);
                 } else {
@@ -112,33 +112,33 @@ public class ContactUsFragment extends Fragment {
     }
 
     private void sendMessage() {
-        String id = FirebaseDatabase.getInstance().getReference().push().getKey();
+        String id = UUID.randomUUID().toString();
         String name = nameEt.getText().toString();
-        String email = nameEt.getText().toString();
+        String phoneNo = nameEt.getText().toString();
         String message = msgEt.getText().toString();
         String userId = FirebaseAuth.getInstance().getUid();
 
-        Message msg = new Message(id, name, email, message, userId);
+        Message msg = new Message(id, name, phoneNo, message, userId);
 
-        DatabaseReference messageRef = FirebaseDatabase.getInstance().getReference().child("Messages");
-        messageRef.child(id).setValue(msg)
-                .addOnCompleteListener(new OnCompleteListener<Void>() {
-                    @Override
-                    public void onComplete(@NonNull Task<Void> task) {
-                        if (task.isSuccessful()) {
-                            Toast.makeText(getContext(), "Message successfully sent", Toast.LENGTH_LONG).show();
-                            clearFields();
-                        } else {
-                            Toast.makeText(getContext(), "Message not successfully sent", Toast.LENGTH_LONG).show();
-                            Log.e("msg", task.getException().toString());
-                        }
-                    }
-                });
+        CollectionReference colRef = FirebaseFirestore.getInstance().collection("messages");
+        DocumentReference docRef = colRef.document(id);
+        docRef.set(message).addOnCompleteListener(new OnCompleteListener<Void>() {
+            @Override
+            public void onComplete(@NonNull Task<Void> task) {
+                if (task.isSuccessful()) {
+                    Toast.makeText(getContext(), "Message successfully sent", Toast.LENGTH_LONG).show();
+                    clearFields();
+                } else {
+                    Toast.makeText(getContext(), "Message not successfully sent", Toast.LENGTH_LONG).show();
+                    Log.e("msg", task.getException().toString());
+                }
+            }
+        });
     }
 
     private void clearFields() {
         nameEt.setText("");
         msgEt.setText("");
-        emailEt.setText("");
+        phoneEt.setText("");
     }
 }

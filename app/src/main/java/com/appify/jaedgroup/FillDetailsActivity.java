@@ -5,6 +5,7 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
@@ -39,6 +40,9 @@ public class FillDetailsActivity extends AppCompatActivity {
             estateName = estate.getName();
             userId = FirebaseAuth.getInstance().getUid();
             email = FirebaseAuth.getInstance().getCurrentUser().getEmail();
+            Log.d(getClass().getSimpleName(), "id = " + id);
+        } else {
+            Log.d(getClass().getSimpleName(), "No id found");
         }
 
         layout = findViewById(R.id.layout);

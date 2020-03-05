@@ -14,10 +14,10 @@ import androidx.viewpager.widget.PagerAdapter;
 
 public class ImagePageAdapter extends PagerAdapter {
 
-    private ArrayList<Integer> images;
+    private ArrayList<String> images;
     private Context context;
 
-    public ImagePageAdapter(ArrayList<Integer> images, Context context) {
+    public ImagePageAdapter(ArrayList<String> images, Context context) {
         this.images = images;
         this.context = context;
     }

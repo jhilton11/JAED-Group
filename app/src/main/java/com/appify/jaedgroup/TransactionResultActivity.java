@@ -49,6 +49,7 @@ public class TransactionResultActivity extends AppCompatActivity {
     }
 
     private void exitToHomePage() {
+        finish();
         Intent intent = new Intent(this, MainActivity.class);
         startActivity(intent);
     }

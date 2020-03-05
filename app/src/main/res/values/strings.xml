@@ -2,5 +2,8 @@
     <string name="app_name">JAED Group</string>
     <string name="facebook_app_id" translatable="false">551566192279932</string>
     <string name="fb_login_protocol_scheme" translatable="false">fb551566192279932</string>
+    <string name="already_registered">Already registered?</string>
+    <string name="sign_in">Sign In</string>
+    <string name="password_error_text">Password is at least 8 characters long</string>
 
 </resources>

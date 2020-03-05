@@ -4,18 +4,33 @@ import android.content.Context;
 import android.net.Uri;
 import android.os.Bundle;
 
+import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import co.paystack.android.Transaction;
 
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Toast;
 
 import com.appify.jaedgroup.R;
+import com.appify.jaedgroup.model.EstateTransaction;
+import com.appify.jaedgroup.model.InvestmentTransaction;
+import com.appify.jaedgroup.recyclerAdapters.EstateTransactionAdapter;
 import com.google.android.material.tabs.TabLayout;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.firestore.CollectionReference;
+import com.google.firebase.firestore.DocumentSnapshot;
+import com.google.firebase.firestore.EventListener;
+import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.FirebaseFirestoreException;
+import com.google.firebase.firestore.Query;
+import com.google.firebase.firestore.QuerySnapshot;
+
+import java.util.ArrayList;
 
 /**
  * A fragment with a Google +1 button.
@@ -30,9 +45,8 @@ public class ViewTransactionsFragment extends Fragment {
     private TabLayout tabLayout;
     private RecyclerView recyclerView;
 
-    public ViewTransactionsFragment() {
-        // Required empty public constructor
-    }
+    private ArrayList<EstateTransaction> transactions;
+    private ArrayList<InvestmentTransaction> investmentTransactions;
 
 
     @Override
@@ -44,11 +58,13 @@ public class ViewTransactionsFragment extends Fragment {
         tabLayout = view.findViewById(R.id.tabLayout);
         tabLayout.addTab(tabLayout.newTab().setText("Estates"));
         tabLayout.addTab(tabLayout.newTab().setText("Investments"));
+        tabLayout.getTabAt(0).select();
+        loadEstateTransactions();
 
         recyclerView = view.findViewById(R.id.recyclerview);
         recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
 
-        tabLayout.setOnTabSelectedListener(new TabLayout.OnTabSelectedListener() {
+        tabLayout.addOnTabSelectedListener(new TabLayout.OnTabSelectedListener() {
             @Override
             public void onTabSelected(TabLayout.Tab tab) {
                 if (tab.getText().equals("Estates")) {
@@ -60,12 +76,15 @@ public class ViewTransactionsFragment extends Fragment {
 
             @Override
             public void onTabUnselected(TabLayout.Tab tab) {
-
             }
 
             @Override
             public void onTabReselected(TabLayout.Tab tab) {
-
+                if (tab.getText().equals("Estates")) {
+                    loadEstateTransactions();
+                } else {
+                    loadInvestmentTransactions();
+                }
             }
         });
 
@@ -95,11 +114,50 @@ public class ViewTransactionsFragment extends Fragment {
     }
 
     private void loadEstateTransactions() {
-        Toast.makeText(getContext(), "Loaded estates", Toast.LENGTH_SHORT).show();
+        //Toast.makeText(getContext(), "Loaded estates", Toast.LENGTH_SHORT).show();
+        CollectionReference colRef = FirebaseFirestore.getInstance().collection("estatetransaction");
+        Query query = colRef.whereEqualTo("userId", FirebaseAuth.getInstance().getCurrentUser().getUid());
+        query.addSnapshotListener(new EventListener<QuerySnapshot>() {
+            @Override
+            public void onEvent(@Nullable QuerySnapshot queryDocumentSnapshots, @Nullable FirebaseFirestoreException e) {
+                if (e==null) {
+                    transactions = new ArrayList();
+
+                    for (DocumentSnapshot snapshot: queryDocumentSnapshots.getDocuments()) {
+                        EstateTransaction transaction = snapshot.toObject(EstateTransaction.class);
+                        transactions.add(transaction);
+                    }
+
+                    EstateTransactionAdapter adapter = new EstateTransactionAdapter(transactions);
+                    recyclerView.setAdapter(adapter);
+                } else {
+                    Log.e(getClass().getSimpleName(), "error: " + e.getMessage());
+                }
+            }
+        });
     }
 
     private void loadInvestmentTransactions() {
-        Toast.makeText(getContext(), "Loaded investments", Toast.LENGTH_SHORT).show();
+        CollectionReference colRef = FirebaseFirestore.getInstance().collection("investments");
+        Query query = colRef.whereEqualTo("userId", FirebaseAuth.getInstance().getCurrentUser().getUid());
+        query.addSnapshotListener(new EventListener<QuerySnapshot>() {
+            @Override
+            public void onEvent(@Nullable QuerySnapshot queryDocumentSnapshots, @Nullable FirebaseFirestoreException e) {
+                if (e==null) {
+                    investmentTransactions = new ArrayList();
+
+                    for (DocumentSnapshot snapshot: queryDocumentSnapshots.getDocuments()) {
+                        InvestmentTransaction transaction = snapshot.toObject(InvestmentTransaction.class);
+                        investmentTransactions.add(transaction);
+                    }
+
+                    EstateTransactionAdapter adapter = new EstateTransactionAdapter(transactions);
+                    recyclerView.setAdapter(adapter);
+                } else {
+                    Log.e(getClass().getSimpleName(), "error: " + e.getMessage());
+                }
+            }
+        });
     }
     /**
      * This interface must be implemented by activities that contain this

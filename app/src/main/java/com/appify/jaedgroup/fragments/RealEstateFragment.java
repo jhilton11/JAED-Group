@@ -95,12 +95,13 @@ public class RealEstateFragment extends Fragment {
 
     private void loadData() {
         if (tasks.checkNetworkStatus(getContext())) {
-            estateArrayList = new ArrayList<>();
+
             connectionStatusTv.setVisibility(View.GONE);
             estateRef.addSnapshotListener(new EventListener<QuerySnapshot>() {
                 @Override
                 public void onEvent(@Nullable QuerySnapshot queryDocumentSnapshots, @Nullable FirebaseFirestoreException e) {
                     for (DocumentSnapshot snapshot: queryDocumentSnapshots.getDocuments()) {
+                        estateArrayList = new ArrayList<>();
                         Estate estate = snapshot.toObject(Estate.class);
                         estateArrayList.add(estate);
                     }

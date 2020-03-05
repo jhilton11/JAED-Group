@@ -1,20 +1,28 @@
 package com.appify.jaedgroup.model;
 
-public class InvestmentTransaction {
+import java.io.Serializable;
+
+public class InvestmentTransaction implements Serializable {
     private String id;
     private String name;
     private String investmentId;
-    private String investmentName;
+    private String nextOfKinName;
     private String phoneNo;
     private String address;
-    private String age;
-    private int amountPaid;
-    private int expectedReturn;
+    private String dateOfBirth;
+    private double amountPaid;
+    private double expectedReturn;
     private String datePaid;
-    private String orderNo;
+    private long datePaidLong;
+    private String reference;
     private String email;
     private String userId;
+    private String nextOfKinPhoneNo;
+    private String gender;
+    private String maritalStatus;
+    private boolean isReady;
     private String maturityDate;
+    private String transactionStatus;
 
     public InvestmentTransaction() {
     }
@@ -43,12 +51,12 @@ public class InvestmentTransaction {
         this.investmentId = investmentId;
     }
 
-    public String getInvestmentName() {
-        return investmentName;
+    public String getNextOfKinName() {
+        return nextOfKinName;
     }
 
-    public void setInvestmentName(String investmentName) {
-        this.investmentName = investmentName;
+    public void setNextOfKinName(String nextOfKinName) {
+        this.nextOfKinName = nextOfKinName;
     }
 
     public String getPhoneNo() {
@@ -67,27 +75,27 @@ public class InvestmentTransaction {
         this.address = address;
     }
 
-    public String getAge() {
-        return age;
+    public String getDateOfBirth() {
+        return dateOfBirth;
     }
 
-    public void setAge(String age) {
-        this.age = age;
+    public void setDateOfBirth(String dateOfBirth) {
+        this.dateOfBirth = dateOfBirth;
     }
 
-    public int getAmountPaid() {
+    public double getAmountPaid() {
         return amountPaid;
     }
 
-    public void setAmountPaid(int amountPaid) {
+    public void setAmountPaid(double amountPaid) {
         this.amountPaid = amountPaid;
     }
 
-    public int getExpectedReturn() {
+    public double getExpectedReturn() {
         return expectedReturn;
     }
 
-    public void setExpectedReturn(int expectedReturn) {
+    public void setExpectedReturn(double expectedReturn) {
         this.expectedReturn = expectedReturn;
     }
 
@@ -99,12 +107,20 @@ public class InvestmentTransaction {
         this.datePaid = datePaid;
     }
 
-    public String getOrderNo() {
-        return orderNo;
+    public long getDatePaidLong() {
+        return datePaidLong;
     }
 
-    public void setOrderNo(String orderNo) {
-        this.orderNo = orderNo;
+    public void setDatePaidLong(long datePaidLong) {
+        this.datePaidLong = datePaidLong;
+    }
+
+    public String getReference() {
+        return reference;
+    }
+
+    public void setReference(String reference) {
+        this.reference = reference;
     }
 
     public String getEmail() {
@@ -129,5 +145,45 @@ public class InvestmentTransaction {
 
     public void setMaturityDate(String maturityDate) {
         this.maturityDate = maturityDate;
+    }
+
+    public String getNextOfKinPhoneNo() {
+        return nextOfKinPhoneNo;
+    }
+
+    public void setNextOfKinPhoneNo(String nextOfKinPhoneNo) {
+        this.nextOfKinPhoneNo = nextOfKinPhoneNo;
+    }
+
+    public String getGender() {
+        return gender;
+    }
+
+    public void setGender(String gender) {
+        this.gender = gender;
+    }
+
+    public String getMaritalStatus() {
+        return maritalStatus;
+    }
+
+    public void setMaritalStatus(String maritalStatus) {
+        this.maritalStatus = maritalStatus;
+    }
+
+    public boolean isReady() {
+        return isReady;
+    }
+
+    public void setReady(boolean ready) {
+        isReady = ready;
+    }
+
+    public String getTransactionStatus() {
+        return transactionStatus;
+    }
+
+    public void setTransactionStatus(String transactionStatus) {
+        this.transactionStatus = transactionStatus;
     }
 }

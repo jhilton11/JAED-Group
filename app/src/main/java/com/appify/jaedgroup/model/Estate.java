@@ -6,7 +6,7 @@ public class Estate implements Serializable {
     private String id;
     private String name;
     private String description;
-    private String location;
+    private String address ;
     private String promoDetails;
     private String imgUrl;
 
@@ -37,12 +37,12 @@ public class Estate implements Serializable {
         this.description = description;
     }
 
-    public String getLocation() {
-        return location;
+    public String getAddress() {
+        return address;
     }
 
-    public void setLocation(String location) {
-        this.location = location;
+    public void setAddress(String address) {
+        this.address = address;
     }
 
     public String getPromoDetails() {

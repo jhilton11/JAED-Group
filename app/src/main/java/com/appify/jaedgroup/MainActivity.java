@@ -132,6 +132,6 @@ InvestmentFragment.OnFragmentInteractionListener, ViewTransactionsFragment.OnTra
 
     @Override
     public void onTransactionsClick(Transaction transaction) {
-        //transaction.
+
     }
 }

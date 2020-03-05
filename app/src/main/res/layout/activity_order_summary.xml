@@ -25,7 +25,10 @@
         android:id="@+id/price_tv"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="N100,000"
+        tools:text="N100,000"
+        android:textSize="18sp"
+        android:textStyle="bold"
+        android:fontFamily="casual"
         android:layout_marginBottom="20dp"/>
 
     <Button

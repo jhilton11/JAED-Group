@@ -16,6 +16,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.appify.jaedgroup.model.EstateTransaction;
+import com.appify.jaedgroup.model.EstatesInfo;
 import com.appify.jaedgroup.model.OptionType;
 import com.appify.jaedgroup.utils.Constants;
 import com.appify.jaedgroup.utils.tasks;
@@ -38,7 +39,7 @@ public class OrderSummaryActivity extends AppCompatActivity {
     private ProgressDialog dialog;
     private Button button;
 
-    private Map<String, Integer> prices;
+    private Map<String, String> prices;
     private String id, estateType;
     private int price;
     private static final String naira = "₦";
@@ -68,7 +69,7 @@ public class OrderSummaryActivity extends AppCompatActivity {
                 estateType = rb.getText().toString();
                 transaction.setEstateType(estateType);
 
-                price = prices.get(estateType);
+                price = Integer.parseInt(prices.get(estateType));
                 priceTv.setText("Price: " + naira + price);
 
                 if (!button.isEnabled()) {
@@ -99,17 +100,17 @@ public class OrderSummaryActivity extends AppCompatActivity {
     private void loadData() {
         if (tasks.checkNetworkStatus(this)) {
             dialog.show();
-            Query reference = FirebaseFirestore.getInstance().collection("options");
-            reference.whereEqualTo("id", id).orderBy("price", Query.Direction.DESCENDING).addSnapshotListener(new EventListener<QuerySnapshot>() {
+            Query reference = FirebaseFirestore.getInstance().collection("estatesInfo");
+            reference.whereEqualTo("id", id).addSnapshotListener(new EventListener<QuerySnapshot>() {
                 @Override
                 public void onEvent(@Nullable QuerySnapshot queryDocumentSnapshots, @Nullable FirebaseFirestoreException e) {
                     if (e==null && !queryDocumentSnapshots.isEmpty()) {
                         prices = new HashMap<>();
-                        ArrayList<OptionType> arrayList = new ArrayList<>();
+                        ArrayList<EstatesInfo> arrayList = new ArrayList<>();
                         for (DocumentSnapshot snapshot: queryDocumentSnapshots.getDocuments()) {
-                            OptionType type = snapshot.toObject(OptionType.class);
-                            arrayList.add(type);
-                            prices.put(type.getType() + ":\t" + naira + type.getPrice(), type.getPrice());
+                            EstatesInfo info = snapshot.toObject(EstatesInfo.class);
+                            arrayList.add(info);
+                            prices.put(info.getSize() + ":\t" + naira + info.getPrice(), tasks.getCurrencyString(info.getPrice()));
                         }
                         populateRadioGroup(arrayList);
                         dialog.dismiss();
@@ -127,10 +128,10 @@ public class OrderSummaryActivity extends AppCompatActivity {
         }
     }
 
-    private void populateRadioGroup(ArrayList<OptionType> types) {
-        for (OptionType type: types) {
+    private void populateRadioGroup(ArrayList<EstatesInfo> infos) {
+        for (EstatesInfo info: infos) {
             RadioButton rb = new RadioButton(this);
-            rb.setText(type.getType() + ":\t" + naira + type.getPrice());
+            rb.setText(info.getSize() + "sq m:\t" + naira + info.getPrice());
             radioGroup.addView(rb);
         }
     }
@@ -138,7 +139,7 @@ public class OrderSummaryActivity extends AppCompatActivity {
     private void goToPayment() {
         transaction.setAmountPaid(price);
         Intent intent = new Intent(this, CardPaymentActivity.class);
-        intent.putExtra("estateTransaction", transaction);
+        intent.putExtra("transaction", transaction);
         startActivity(intent);
     }
 }

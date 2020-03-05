@@ -10,6 +10,8 @@ import android.view.View;
 
 import com.google.android.material.snackbar.Snackbar;
 
+import java.text.NumberFormat;
+import java.util.Locale;
 import java.util.regex.Pattern;
 
 import retrofit2.Retrofit;
@@ -51,5 +53,27 @@ public final class tasks {
                     }
                 })
                 .show();
+    }
+
+    public static String getCurrencyString(int amount) {
+        String stringMoney;
+
+        stringMoney = NumberFormat.getNumberInstance(Locale.getDefault()).format(amount);
+
+        return stringMoney;
+    }
+
+    public static String getCurrencyString(double amount) {
+        String stringMoney;
+
+        stringMoney = NumberFormat.getNumberInstance(Locale.getDefault()).format(amount);
+
+        return stringMoney;
+    }
+
+    public static String getCurrencyString(String amount) {
+        double amt = Double.parseDouble(amount);
+
+        return getCurrencyString(amt);
     }
 }

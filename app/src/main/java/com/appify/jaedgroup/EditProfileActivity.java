@@ -104,7 +104,7 @@ public class EditProfileActivity extends AppCompatActivity {
 
     private void updateProfile() {
         if (file != null) {
-            StorageReference storageRef = FirebaseStorage.getInstance().getReference().child("profile_images");
+            StorageReference storageRef = FirebaseStorage.getInstance().getReference().child("profile_images/" + id + ".jpg");
             storageRef.putFile(file).addOnCompleteListener(new OnCompleteListener<UploadTask.TaskSnapshot>() {
                 @Override
                 public void onComplete(@NonNull Task<UploadTask.TaskSnapshot> task) {
@@ -158,7 +158,7 @@ public class EditProfileActivity extends AppCompatActivity {
                     phoneEt.setText(user.getPhoneNo());
                 }
 
-                if (TextUtils.isEmpty(user.getImageUrl())) {
+                if (!TextUtils.isEmpty(user.getImageUrl())) {
                     Glide.with(getApplicationContext()).load(user.getImageUrl()).into(profileImage);
                 }
             }

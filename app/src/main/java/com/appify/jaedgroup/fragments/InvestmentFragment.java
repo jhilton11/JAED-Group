@@ -4,43 +4,44 @@ import android.content.Context;
 import android.os.Bundle;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
+import androidx.viewpager.widget.ViewPager;
+import me.relex.circleindicator.CircleIndicator;
 
+import android.os.Handler;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
-import android.widget.ImageView;
 
 import com.appify.jaedgroup.R;
-import com.bumptech.glide.Glide;
-import com.google.firebase.database.DataSnapshot;
-import com.google.firebase.database.DatabaseError;
-import com.google.firebase.database.DatabaseReference;
-import com.google.firebase.database.FirebaseDatabase;
-import com.google.firebase.database.ValueEventListener;
-import com.synnapps.carouselview.CarouselView;
-import com.synnapps.carouselview.ImageListener;
+import com.appify.jaedgroup.model.CarouselItem;
+import com.appify.jaedgroup.recyclerAdapters.ImagePageAdapter;
+import com.google.firebase.firestore.CollectionReference;
+import com.google.firebase.firestore.DocumentSnapshot;
+import com.google.firebase.firestore.EventListener;
+import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.FirebaseFirestoreException;
+import com.google.firebase.firestore.QuerySnapshot;
 
 import java.util.ArrayList;
+import java.util.Timer;
+import java.util.TimerTask;
 
-/**
- * A simple {@link Fragment} subclass.
- * Activities that contain this fragment must implement the
- * {@link InvestmentFragment.OnFragmentInteractionListener} interface
- * to handle interaction events.
- */
 public class InvestmentFragment extends Fragment {
 
-    private CarouselView carouselView;
+    private static final long DELAY_MS = 1000;
+    private static final long PERIOD_MS = 3000;
+    private ViewPager viewPager;
+    private CircleIndicator indicator;
     private Button newInvestmentBtn, viewInvestmentsBtn;
 
     private OnFragmentInteractionListener mListener;
-
-    public InvestmentFragment() {
-        // Required empty public constructor
-    }
-
+    private ImagePageAdapter adapter;
+    
+    private int currentPage;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -49,10 +50,10 @@ public class InvestmentFragment extends Fragment {
 
         View view = inflater.inflate(R.layout.fragment_investment, container, false);
 
-        carouselView = view.findViewById(R.id.carousel_view);
-
+        viewPager = view.findViewById(R.id.view_pager);
         newInvestmentBtn = view.findViewById(R.id.new_investment_btn);
         viewInvestmentsBtn = view.findViewById(R.id.view_investments_btn);
+        indicator = view.findViewById(R.id.circular_indicator);
 
         newInvestmentBtn.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -67,6 +68,8 @@ public class InvestmentFragment extends Fragment {
                 viewInvestments();
             }
         });
+
+        loadCarouselImages();
 
         return view;
     }
@@ -88,16 +91,6 @@ public class InvestmentFragment extends Fragment {
         mListener = null;
     }
 
-    /**
-     * This interface must be implemented by activities that contain this
-     * fragment to allow an interaction in this fragment to be communicated
-     * to the activity and potentially other fragments contained in that
-     * activity.
-     * <p>
-     * See the Android Training lesson <a href=
-     * "http://developer.android.com/training/basics/fragments/communicating.html"
-     * >Communicating with Other Fragments</a> for more information.
-     */
     public interface OnFragmentInteractionListener {
         // TODO: Update argument type and name
         void onNewInvestmentClick();
@@ -107,27 +100,21 @@ public class InvestmentFragment extends Fragment {
 
     //TODO: Write code for loading the images into the carousel
     private void loadCarouselImages() {
-        final ArrayList<String> imageUrls = new ArrayList<>();
-        DatabaseReference imageRef = FirebaseDatabase.getInstance().getReference().child("CarouselImages");
-        imageRef.addListenerForSingleValueEvent(new ValueEventListener() {
+        CollectionReference colRef = FirebaseFirestore.getInstance().collection("carousel_images");
+        colRef.addSnapshotListener(new EventListener<QuerySnapshot>() {
             @Override
-            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                for (DataSnapshot snapshot: dataSnapshot.getChildren()) {
-                    String imgUrl = snapshot.getValue(String.class);
-                    imageUrls.add(imgUrl);
+            public void onEvent(@Nullable QuerySnapshot queryDocumentSnapshots, @Nullable FirebaseFirestoreException e) {
+                ArrayList<CarouselItem> items = new ArrayList<>();
+                for (DocumentSnapshot snapshot: queryDocumentSnapshots.getDocuments()) {
+                    CarouselItem item = snapshot.toObject(CarouselItem.class);
+                    items.add(item);
                 }
+                Log.d(getClass().getSimpleName(), items.size() + " items");
 
-                carouselView.setImageListener(new ImageListener() {
-                    @Override
-                    public void setImageForPosition(int position, ImageView imageView) {
-                        Glide.with(getContext()).load(imageUrls.get(position)).into(imageView);
-                    }
-                });
-            }
-
-            @Override
-            public void onCancelled(@NonNull DatabaseError databaseError) {
-
+                adapter = new ImagePageAdapter(items, getContext());
+                viewPager.setAdapter(adapter);
+                indicator.setViewPager(viewPager);
+                setupCarousel(items.size());
             }
         });
     }
@@ -138,5 +125,26 @@ public class InvestmentFragment extends Fragment {
 
     private void viewInvestments() {
         mListener.onViewInvestmentClick();
+    }
+
+    private void setupCarousel(int size) {
+        int NUM_PAGES = size;
+        final Handler handler = new Handler();
+        final Runnable Update = new Runnable() {
+            public void run() {
+                if (currentPage == NUM_PAGES-1) {
+                    currentPage = 0;
+                }
+                viewPager.setCurrentItem(currentPage++, true);
+            }
+        };
+
+        Timer timer = new Timer(); // This will create a new Thread
+        timer.schedule(new TimerTask() { // task to be scheduled
+            @Override
+            public void run() {
+                handler.post(Update);
+            }
+        }, DELAY_MS, PERIOD_MS);
     }
 }

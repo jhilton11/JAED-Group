@@ -18,6 +18,8 @@ import com.appify.jaedgroup.utils.Constants;
 import com.appify.jaedgroup.utils.tasks;
 import com.google.firebase.auth.FirebaseAuth;
 
+import java.util.UUID;
+
 public class FillDetailsActivity extends AppCompatActivity {
     private Button payBtn;
     private EditText nameEt, occupatonEt, phoneNoEt, addressEt, nextOfKinAddressEt, dateOfBirthEt, nextOfKinPhoneNoEt;
@@ -115,6 +117,7 @@ public class FillDetailsActivity extends AppCompatActivity {
                         addressEt.getText().toString(), dateOfBirthEt.getText().toString(), occupatonEt.getText().toString(), maritalStatus,
                         nextOfKinPhoneNo, nextOfKinAddressEt.getText().toString(), nextOfKinAddressEt.getText().toString(), purposeOfLand,
                         willAcceptAlternativePlot, email, userId);
+                transaction.setId(UUID.randomUUID().toString());
                 Intent intent = new Intent(this, OrderSummaryActivity.class);
                 intent.putExtra("estateTransaction", transaction);
                 startActivity(intent);

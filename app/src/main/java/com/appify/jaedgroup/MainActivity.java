@@ -75,6 +75,7 @@ InvestmentFragment.OnFragmentInteractionListener, ViewTransactionsFragment.OnTra
                 return true;
             }
         });
+        bottomNavBar.setSelectedItemId(R.id.investment);
     }
 
     @Override

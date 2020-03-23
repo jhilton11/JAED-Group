@@ -83,7 +83,7 @@ public class SignUpActivity extends AppCompatActivity {
                             public void onComplete(@NonNull Task<Void> task) {
                                 if (task.isSuccessful()) {
                                     dialog.dismiss();
-                                    Toast.makeText(SignUpActivity.this, "Please verify your email. An activation email has been sent to " + user.getEmail(), Toast.LENGTH_SHORT).show();
+                                    Toast.makeText(SignUpActivity.this, "Please verify your email. An activation email has been sent to " + user.getEmail(), Toast.LENGTH_LONG).show();
                                     finish();
                                 }
                             }

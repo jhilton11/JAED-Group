@@ -13,12 +13,6 @@ import android.widget.Toast;
 
 import com.appify.jaedgroup.model.User;
 import com.appify.jaedgroup.utils.tasks;
-import com.facebook.AccessToken;
-import com.facebook.CallbackManager;
-import com.facebook.FacebookCallback;
-import com.facebook.FacebookException;
-import com.facebook.login.LoginManager;
-import com.facebook.login.LoginResult;
 import com.google.android.gms.auth.api.signin.GoogleSignIn;
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
 import com.google.android.gms.auth.api.signin.GoogleSignInClient;
@@ -110,11 +104,11 @@ public class LoginActivity extends AppCompatActivity {
     protected void onStart() {
         super.onStart();
 
+        dialog.show();
         mAuth = FirebaseAuth.getInstance();
         FirebaseUser user = mAuth.getCurrentUser();
 
         if (user != null) {
-            dialog.show();
             if (user.isEmailVerified()) {
                 dialog.dismiss();
                 signIn();
@@ -123,6 +117,8 @@ public class LoginActivity extends AppCompatActivity {
                 displayVerifyEmailView();
                 Log.d("tag", "Email is not verified");
             }
+        } else {
+            dialog.dismiss();
         }
     }
 
@@ -133,18 +129,21 @@ public class LoginActivity extends AppCompatActivity {
         if (requestCode == RC_SIGN_IN) {
             Task<GoogleSignInAccount> task = GoogleSignIn.getSignedInAccountFromIntent(data);
             try {
+                dialog.setCancelable(false);
+                dialog.setMessage("Please wait....");
                 GoogleSignInAccount account = task.getResult(ApiException.class);
                 firebaseAuthWithGoogle(account);
                 Log.d("msg", "Successfully logged into google");
             } catch (ApiException e) {
                 Log.w("error", ""+task.getException().toString());
+                tasks.makeSnackbar(layout, "Unable to log in " + task.getException().getMessage());
             }
         }
     }
 
     private void googleSignIn() {
         if (tasks.checkNetworkStatus(this)) {
-            //dialog.show();
+            dialog.show();
             Log.d("msg", "Trying to login to gmail");
             Intent signInIntent = mGoogleSignInClient.getSignInIntent();
             startActivityForResult(signInIntent, RC_SIGN_IN);
@@ -175,10 +174,12 @@ public class LoginActivity extends AppCompatActivity {
                 .addOnCompleteListener(new OnCompleteListener<AuthResult>() {
                     @Override
                     public void onComplete(@NonNull Task<AuthResult> task) {
-                        //dialog.dismiss();
+                        dialog.dismiss();
                         if (task.isSuccessful()) {
                             Log.d("msg", "Firebase sign in was successful");
                             signIn();
+                        } else {
+                            tasks.makeSnackbar(layout, "Unable to log in " + task.getException().getMessage());
                         }
                     }
                 });

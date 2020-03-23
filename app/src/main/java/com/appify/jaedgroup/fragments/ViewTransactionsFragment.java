@@ -20,6 +20,7 @@ import com.appify.jaedgroup.R;
 import com.appify.jaedgroup.model.EstateTransaction;
 import com.appify.jaedgroup.model.InvestmentTransaction;
 import com.appify.jaedgroup.recyclerAdapters.EstateTransactionAdapter;
+import com.appify.jaedgroup.recyclerAdapters.InvestmentTransactionAdapter;
 import com.google.android.material.tabs.TabLayout;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.CollectionReference;
@@ -120,9 +121,8 @@ public class ViewTransactionsFragment extends Fragment {
         query.addSnapshotListener(new EventListener<QuerySnapshot>() {
             @Override
             public void onEvent(@Nullable QuerySnapshot queryDocumentSnapshots, @Nullable FirebaseFirestoreException e) {
+                transactions = new ArrayList();
                 if (e==null) {
-                    transactions = new ArrayList();
-
                     for (DocumentSnapshot snapshot: queryDocumentSnapshots.getDocuments()) {
                         EstateTransaction transaction = snapshot.toObject(EstateTransaction.class);
                         transactions.add(transaction);
@@ -143,15 +143,14 @@ public class ViewTransactionsFragment extends Fragment {
         query.addSnapshotListener(new EventListener<QuerySnapshot>() {
             @Override
             public void onEvent(@Nullable QuerySnapshot queryDocumentSnapshots, @Nullable FirebaseFirestoreException e) {
+                investmentTransactions = new ArrayList();
                 if (e==null) {
-                    investmentTransactions = new ArrayList();
-
                     for (DocumentSnapshot snapshot: queryDocumentSnapshots.getDocuments()) {
                         InvestmentTransaction transaction = snapshot.toObject(InvestmentTransaction.class);
                         investmentTransactions.add(transaction);
                     }
 
-                    EstateTransactionAdapter adapter = new EstateTransactionAdapter(transactions);
+                    InvestmentTransactionAdapter adapter = new InvestmentTransactionAdapter(investmentTransactions);
                     recyclerView.setAdapter(adapter);
                 } else {
                     Log.e(getClass().getSimpleName(), "error: " + e.getMessage());

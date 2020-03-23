@@ -16,15 +16,17 @@ import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.View;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import com.appify.jaedgroup.model.EstateTransaction;
 import com.appify.jaedgroup.services.PaystackService;
 import com.appify.jaedgroup.utils.RetrofitInstance;
-import com.craftman.cardform.CardForm;
-import com.craftman.cardform.OnPayBtnClickListner;
+import com.appify.jaedgroup.utils.TextFormatters;
+import com.appify.jaedgroup.utils.tasks;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.firestore.DocumentReference;
@@ -35,9 +37,11 @@ import java.io.InputStreamReader;
 import java.net.URL;
 
 public class CardPaymentActivity extends AppCompatActivity {
-    private CardForm cardForm;
+    private EditText cardCvvEt, cardEt, cardExpEt;
+    private Button payBtn;
+    private TextView amountTv;
     private ProgressDialog dialog;
-    private co.paystack.android.model.Card pCard;
+    private Card card;
     private EstateTransaction trans;
 
     private int amount;
@@ -54,37 +58,28 @@ public class CardPaymentActivity extends AppCompatActivity {
             amount = trans.getAmountPaid();
         }
 
+        cardEt = findViewById(R.id.card_number_et);
+        cardCvvEt = findViewById(R.id.card_cvv);
+        cardExpEt = findViewById(R.id.card_expiry_et);
+        amountTv = findViewById(R.id.total_tv);
+        payBtn = findViewById(R.id.pay_btn);
+
+        formatInputs();
+
         PaystackSdk.initialize(getApplicationContext());
 
-        cardForm = findViewById(R.id.card_form);
         dialog = new ProgressDialog(this);
 
-        TextView amountTv = (TextView) (cardForm.getRootView().findViewById(R.id.payment_amount));
-        amountTv.setText(String.valueOf(amount));
+        amountTv.setText("#" + tasks.getCurrencyString(amount));
 
-        Button amtBtn = (Button) (cardForm.getRootView().findViewById(R.id.btn_pay));
-        amtBtn.setText("Pay #" + String.valueOf(amount));
-
-//        amtBtn.setOnClickListener(new View.OnClickListener() {
-//            @Override
-//            public void onClick(View view) {
-//                performTest();
-//            }
-//        });
-
-        cardForm.setPayBtnClickListner(new OnPayBtnClickListner() {
+        payBtn.setOnClickListener(new View.OnClickListener() {
             @Override
-            public void onClick(com.craftman.cardform.Card card) {
-//                String cardNumber = card.getNumber();
-//                int expiryMonth = card.getExpMonth();
-//                int expiryYear = card.getExpYear();
-//                String cvv = card.getCVC();
-//
-//                pCard = new co.paystack.android.model.Card(cardNumber, expiryMonth, expiryYear, cvv);
-//                performCharge(pCard);
+            public void onClick(View view) {
                 performTest();
             }
         });
+
+
     }
 
     private void performCharge(Card card) {
@@ -131,8 +126,8 @@ public class CardPaymentActivity extends AppCompatActivity {
         int expiryYear = 21;
         String cvv = "123";
 
-        pCard = new co.paystack.android.model.Card(cardNumber, expiryMonth, expiryYear, cvv);
-        performCharge(pCard);
+        card = new co.paystack.android.model.Card(cardNumber, expiryMonth, expiryYear, cvv);
+        performCharge(card);
     }
 
     private void verify(final String reference) {
@@ -225,5 +220,10 @@ public class CardPaymentActivity extends AppCompatActivity {
                 }
             }
         });
+    }
+
+    private void formatInputs() {
+        cardEt.addTextChangedListener(new TextFormatters.CardTextWatcher());
+        cardExpEt.addTextChangedListener(new TextFormatters.ExpiryDateTextWatcher());
     }
 }

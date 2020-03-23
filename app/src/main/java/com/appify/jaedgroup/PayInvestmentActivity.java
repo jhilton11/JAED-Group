@@ -23,6 +23,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.appify.jaedgroup.model.InvestmentTransaction;
+import com.appify.jaedgroup.utils.TextFormatters;
 import com.appify.jaedgroup.utils.tasks;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
@@ -51,7 +52,7 @@ public class PayInvestmentActivity extends AppCompatActivity {
         setContentView(R.layout.activity_pay_investment);
 
         PaystackSdk.initialize(this);
-        trans = (InvestmentTransaction) getIntent().getSerializableExtra("trans");
+        trans = (InvestmentTransaction) getIntent().getSerializableExtra("transaction");
 
         cardNumberEt = findViewById(R.id.card_number_et);
         expiryEt = findViewById(R.id.card_expiry_et);
@@ -62,7 +63,7 @@ public class PayInvestmentActivity extends AppCompatActivity {
         dialog = new ProgressDialog(this);
 
         formatInputs();
-        totalTv.setText("Total: " + String.valueOf(trans.getAmountPaid()));
+        totalTv.setText("Total: " + tasks.getCurrencyString(trans.getAmountPaid()));
         payBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -171,43 +172,8 @@ public class PayInvestmentActivity extends AppCompatActivity {
     }
 
     private void formatInputs() {
-        cardNumberEt.addTextChangedListener(new TextWatcher() {
-            @Override
-            public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
-
-            }
-
-            @Override
-            public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
-
-            }
-
-            @Override
-            public void afterTextChanged(Editable editable) {
-                int pos = 0;
-                char space = ' ';
-                while (true) {
-                    if (pos >= editable.length()) break;
-                    if (space == editable.charAt(pos) && (((pos + 1) % 5) != 0 || pos + 1 == editable.length())) {
-                        editable.delete(pos, pos + 1);
-                    } else {
-                        pos++;
-                    }
-                }
-
-                // Insert char where needed.
-                pos = 4;
-                while (true) {
-                    if (pos >= editable.length()) break;
-                    final char c = editable.charAt(pos);
-                    // Only if its a digit where there should be a space we insert a space
-                    if ("0123456789".indexOf(c) >= 0) {
-                        editable.insert(pos, "" + space);
-                    }
-                    pos += 5;
-                }
-            }
-        });
+        cardNumberEt.addTextChangedListener(new TextFormatters.CardTextWatcher());
+        cvvEt.addTextChangedListener(new TextFormatters.ExpiryDateTextWatcher());
     }
 
     private class VerifyOnServer extends AsyncTask<String, Void, String> {

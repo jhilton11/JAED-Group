@@ -122,7 +122,7 @@ public class ContactUsFragment extends Fragment {
 
         CollectionReference colRef = FirebaseFirestore.getInstance().collection("messages");
         DocumentReference docRef = colRef.document(id);
-        docRef.set(message).addOnCompleteListener(new OnCompleteListener<Void>() {
+        docRef.set(msg).addOnCompleteListener(new OnCompleteListener<Void>() {
             @Override
             public void onComplete(@NonNull Task<Void> task) {
                 if (task.isSuccessful()) {

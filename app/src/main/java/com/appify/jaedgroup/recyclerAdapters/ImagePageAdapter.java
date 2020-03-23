@@ -5,6 +5,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 
+import com.appify.jaedgroup.model.CarouselItem;
 import com.bumptech.glide.Glide;
 
 import java.util.ArrayList;
@@ -14,11 +15,11 @@ import androidx.viewpager.widget.PagerAdapter;
 
 public class ImagePageAdapter extends PagerAdapter {
 
-    private ArrayList<String> images;
+    private ArrayList<CarouselItem> items;
     private Context context;
 
-    public ImagePageAdapter(ArrayList<String> images, Context context) {
-        this.images = images;
+    public ImagePageAdapter(ArrayList<CarouselItem> items, Context context) {
+        this.items = items;
         this.context = context;
     }
 
@@ -27,14 +28,14 @@ public class ImagePageAdapter extends PagerAdapter {
     public Object instantiateItem(@NonNull ViewGroup container, int position) {
         ImageView imageView = new ImageView(context);
         imageView.setScaleType(ImageView.ScaleType.CENTER_CROP);
-        Glide.with(context).load(images.get(position)).into(imageView);
+        Glide.with(context).load(items.get(position).getImgUrl()).into(imageView);
         container.addView(imageView);
         return imageView;
     }
 
     @Override
     public int getCount() {
-        return images.size();
+        return items.size();
     }
 
     @Override

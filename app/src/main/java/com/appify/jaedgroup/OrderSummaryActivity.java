@@ -70,7 +70,7 @@ public class OrderSummaryActivity extends AppCompatActivity {
                 transaction.setEstateType(estateType);
 
                 price = Integer.parseInt(prices.get(estateType));
-                priceTv.setText("Price: " + naira + price);
+                priceTv.setText("Price: " + naira + tasks.getCurrencyString(price));
 
                 if (!button.isEnabled()) {
                     button.setEnabled(true);
@@ -101,7 +101,7 @@ public class OrderSummaryActivity extends AppCompatActivity {
         if (tasks.checkNetworkStatus(this)) {
             dialog.show();
             Query reference = FirebaseFirestore.getInstance().collection("estatesInfo");
-            reference.whereEqualTo("id", id).addSnapshotListener(new EventListener<QuerySnapshot>() {
+            reference.whereEqualTo("name", id).addSnapshotListener(new EventListener<QuerySnapshot>() {
                 @Override
                 public void onEvent(@Nullable QuerySnapshot queryDocumentSnapshots, @Nullable FirebaseFirestoreException e) {
                     if (e==null && !queryDocumentSnapshots.isEmpty()) {
@@ -110,7 +110,7 @@ public class OrderSummaryActivity extends AppCompatActivity {
                         for (DocumentSnapshot snapshot: queryDocumentSnapshots.getDocuments()) {
                             EstatesInfo info = snapshot.toObject(EstatesInfo.class);
                             arrayList.add(info);
-                            prices.put(info.getSize() + ":\t" + naira + info.getPrice(), tasks.getCurrencyString(info.getPrice()));
+                            prices.put(info.getSize() + "sq m:\t\t" + naira + tasks.getCurrencyString(info.getPrice()), info.getPrice());
                         }
                         populateRadioGroup(arrayList);
                         dialog.dismiss();
@@ -131,13 +131,13 @@ public class OrderSummaryActivity extends AppCompatActivity {
     private void populateRadioGroup(ArrayList<EstatesInfo> infos) {
         for (EstatesInfo info: infos) {
             RadioButton rb = new RadioButton(this);
-            rb.setText(info.getSize() + "sq m:\t" + naira + info.getPrice());
+            rb.setText(info.getSize() + "sq m:\t\t" + naira + tasks.getCurrencyString(info.getPrice()));
             radioGroup.addView(rb);
         }
     }
 
     private void goToPayment() {
-        transaction.setAmountPaid(price);
+        transaction.setAmountPaid(price * 100);
         Intent intent = new Intent(this, CardPaymentActivity.class);
         intent.putExtra("transaction", transaction);
         startActivity(intent);

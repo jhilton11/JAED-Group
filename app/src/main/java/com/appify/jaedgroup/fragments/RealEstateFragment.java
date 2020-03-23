@@ -59,8 +59,6 @@ public class RealEstateFragment extends Fragment {
         // Inflate the layout for this fragment
         View view = inflater.inflate(R.layout.fragment_real_estate, container, false);
 
-        estateRef = FirebaseFirestore.getInstance().collection("estates");
-
         connectionStatusTv = view.findViewById(R.id.connection_status_tv);
         dialog = new ProgressDialog(getContext());
         recyclerView = view.findViewById(R.id.recyclerview);
@@ -97,11 +95,12 @@ public class RealEstateFragment extends Fragment {
         if (tasks.checkNetworkStatus(getContext())) {
 
             connectionStatusTv.setVisibility(View.GONE);
+            estateRef = FirebaseFirestore.getInstance().collection("estates");
             estateRef.addSnapshotListener(new EventListener<QuerySnapshot>() {
                 @Override
                 public void onEvent(@Nullable QuerySnapshot queryDocumentSnapshots, @Nullable FirebaseFirestoreException e) {
+                    estateArrayList = new ArrayList<>();
                     for (DocumentSnapshot snapshot: queryDocumentSnapshots.getDocuments()) {
-                        estateArrayList = new ArrayList<>();
                         Estate estate = snapshot.toObject(Estate.class);
                         estateArrayList.add(estate);
                     }

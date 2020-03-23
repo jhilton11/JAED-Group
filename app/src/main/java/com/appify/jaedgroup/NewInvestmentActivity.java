@@ -15,6 +15,8 @@ import com.appify.jaedgroup.model.InvestmentTransaction;
 import com.appify.jaedgroup.utils.tasks;
 import com.google.firebase.auth.FirebaseAuth;
 
+import java.util.UUID;
+
 public class NewInvestmentActivity extends AppCompatActivity {
     private EditText nameEt, dobEt, phoneNoEt, addressEt, emailEt, nextOfinNameEt, nextOfKinPhoneNoEt;
     private RadioGroup maritalStatusRg, genderRg;
@@ -78,6 +80,7 @@ public class NewInvestmentActivity extends AppCompatActivity {
             tasks.makeSnackbar(layout, "Gender not selected");
             return false;
         }
+        transaction.setId(UUID.randomUUID().toString());
         transaction.setName(nameEt.getText().toString().trim());
         transaction.setPhoneNo(phoneNoEt.getText().toString().trim());
         transaction.setAddress(addressEt.getText().toString().trim());
@@ -88,7 +91,7 @@ public class NewInvestmentActivity extends AppCompatActivity {
         transaction.setMaritalStatus(mRb.getText().toString().trim());
         RadioButton gRb = findViewById(genderRg.getCheckedRadioButtonId());
         transaction.setGender(gRb.getText().toString().trim());
-        transaction.setId(FirebaseAuth.getInstance().getCurrentUser().getUid());
+        transaction.setUserId(FirebaseAuth.getInstance().getCurrentUser().getUid());
         return true;
     }
 

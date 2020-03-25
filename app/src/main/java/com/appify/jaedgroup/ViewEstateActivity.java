@@ -16,6 +16,7 @@ import android.widget.TextView;
 
 import com.appify.jaedgroup.model.CarouselItem;
 import com.appify.jaedgroup.model.Estate;
+import com.appify.jaedgroup.recyclerAdapters.ImageAdapter;
 import com.appify.jaedgroup.recyclerAdapters.ImagePageAdapter;
 import com.appify.jaedgroup.utils.Constants;
 import com.google.firebase.firestore.CollectionReference;
@@ -33,7 +34,7 @@ public class ViewEstateActivity extends AppCompatActivity {
     private TextView estate_description, estate_address, promo_details;
     private Button payBtn;
 
-    private ArrayList<CarouselItem> estateImages;
+    private ArrayList<String> estateImages;
     private CollectionReference estateRef;
     private String id;
 
@@ -101,11 +102,11 @@ public class ViewEstateActivity extends AppCompatActivity {
             public void onEvent(@Nullable QuerySnapshot queryDocumentSnapshots, @Nullable FirebaseFirestoreException e) {
                 estateImages = new ArrayList<>();
                 for (DocumentSnapshot snapshot: queryDocumentSnapshots.getDocuments()) {
-                    CarouselItem item = snapshot.toObject(CarouselItem.class);
+                    String item = snapshot.getString("id");
                     estateImages.add(item);
-                    Log.d("imgUrl", item.getImgUrl());
+                    Log.d("imgUrl", item);
                 }
-                ImagePageAdapter pageAdapter = new ImagePageAdapter(estateImages, getApplicationContext());
+                ImageAdapter pageAdapter = new ImageAdapter(estateImages, getApplicationContext());
                 viewPager.setAdapter(pageAdapter);
                 indicator.setViewPager(viewPager);
             }

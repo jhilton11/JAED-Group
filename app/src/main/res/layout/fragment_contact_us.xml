@@ -34,10 +34,12 @@
         android:id="@+id/message_et"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:textAlignment="gravity"
-        android:layout_gravity="top|start"
+        android:minLines="4"
         android:layout_weight="1"
-        android:hint="Enter your message"/>
+        android:inputType="textMultiLine"
+        android:gravity="top|left"
+        android:hint="Enter your message"
+        android:scrollbars="vertical"/>
 
     <Button
         android:id="@+id/send_btn"

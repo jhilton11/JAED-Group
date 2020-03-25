@@ -8,12 +8,21 @@
     tools:context=".fragments.InvestmentFragment">
 
     <!-- TODO: Update blank fragment layout -->
-    <com.synnapps.carouselview.CarouselView
-        android:id="@+id/carousel_view"
+    <FrameLayout
         android:layout_width="match_parent"
-        android:layout_height="200dp"
-        android:layout_marginTop="10dp"
-        android:layout_marginBottom="20dp"/>
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="20dp"
+        android:padding="10dp">
+        <androidx.viewpager.widget.ViewPager
+            android:id="@+id/view_pager"
+            android:layout_width="match_parent"
+            android:layout_height="200dp"/>
+        <me.relex.circleindicator.CircleIndicator
+            android:id="@+id/circular_indicator"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="bottom|center_horizontal" />
+    </FrameLayout>
     <Button
         android:id="@+id/view_investments_btn"
         android:layout_width="match_parent"

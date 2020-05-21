@@ -53,7 +53,7 @@ public class NewInvestmentActivity extends AppCompatActivity {
     }
 
     private boolean getDetails() {
-        transaction = new InvestmentTransaction();
+        transaction = new InvestmentTransaction(FirebaseAuth.getInstance().getCurrentUser().getUid());
 
         if (TextUtils.isEmpty(nameEt.getText().toString())) {
             tasks.makeSnackbar(layout, "Name field is empty");

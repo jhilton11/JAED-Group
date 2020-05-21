@@ -101,9 +101,9 @@ InvestmentFragment.OnFragmentInteractionListener, ViewTransactionsFragment.OnTra
     private void logOut() {
         FirebaseAuth mAuth = FirebaseAuth.getInstance();
         mAuth.signOut();
-        finish();
         Intent intent = new Intent(MainActivity.this, LoginActivity.class);
         startActivity(intent);
+        finish();
     }
 
     private void editProfile() {

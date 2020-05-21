@@ -16,6 +16,7 @@ import android.widget.TextView;
 
 import com.appify.jaedgroup.model.CarouselItem;
 import com.appify.jaedgroup.model.Estate;
+import com.appify.jaedgroup.model.EstateImage;
 import com.appify.jaedgroup.recyclerAdapters.ImageAdapter;
 import com.appify.jaedgroup.recyclerAdapters.ImagePageAdapter;
 import com.appify.jaedgroup.utils.Constants;
@@ -24,6 +25,7 @@ import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.EventListener;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.FirebaseFirestoreException;
+import com.google.firebase.firestore.Query;
 import com.google.firebase.firestore.QuerySnapshot;
 
 import java.util.ArrayList;
@@ -34,8 +36,7 @@ public class ViewEstateActivity extends AppCompatActivity {
     private TextView estate_description, estate_address, promo_details;
     private Button payBtn;
 
-    private ArrayList<String> estateImages;
-    private CollectionReference estateRef;
+    private ArrayList<EstateImage> estateImages;
     private String id;
 
     @Override
@@ -95,16 +96,16 @@ public class ViewEstateActivity extends AppCompatActivity {
     }
 
     private void loadData() {
-        estateRef = FirebaseFirestore.getInstance().collection("estateImages").document(id).collection("images");
-
+        Query estateRef = FirebaseFirestore.getInstance().collection("estate_images")
+                .whereEqualTo("id", id);
         estateRef.addSnapshotListener(new EventListener<QuerySnapshot>() {
             @Override
             public void onEvent(@Nullable QuerySnapshot queryDocumentSnapshots, @Nullable FirebaseFirestoreException e) {
                 estateImages = new ArrayList<>();
                 for (DocumentSnapshot snapshot: queryDocumentSnapshots.getDocuments()) {
-                    String item = snapshot.getString("id");
+                    EstateImage item = snapshot.toObject(EstateImage.class);
                     estateImages.add(item);
-                    Log.d("imgUrl", item);
+                    Log.d("imgUrl", item.getImageUrl());
                 }
                 ImageAdapter pageAdapter = new ImageAdapter(estateImages, getApplicationContext());
                 viewPager.setAdapter(pageAdapter);

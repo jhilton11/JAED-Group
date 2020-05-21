@@ -1,6 +1,11 @@
 package com.appify.jaedgroup.model;
 
+import com.google.firebase.database.ServerValue;
+import com.google.firebase.firestore.Exclude;
+
 import java.io.Serializable;
+import java.lang.reflect.Field;
+import java.util.HashMap;
 
 public class InvestmentTransaction implements Serializable {
     private String id;
@@ -13,7 +18,6 @@ public class InvestmentTransaction implements Serializable {
     private double amountPaid;
     private double expectedReturn;
     private String datePaid;
-    private long datePaidLong;
     private String reference;
     private String email;
     private String userId;
@@ -23,8 +27,16 @@ public class InvestmentTransaction implements Serializable {
     private boolean isReady;
     private String maturityDate;
     private String transactionStatus;
+    private HashMap<String, Object> datePaidObj;
 
     public InvestmentTransaction() {
+    }
+
+    public InvestmentTransaction(String userId) {
+        this.userId = userId;
+        HashMap<String, Object> object = new HashMap<>();
+        object.put("date", ServerValue.TIMESTAMP);
+        datePaidObj = object;
     }
 
     public String getId() {
@@ -107,12 +119,9 @@ public class InvestmentTransaction implements Serializable {
         this.datePaid = datePaid;
     }
 
+    @Exclude
     public long getDatePaidLong() {
-        return datePaidLong;
-    }
-
-    public void setDatePaidLong(long datePaidLong) {
-        this.datePaidLong = datePaidLong;
+        return (long) datePaidObj.get("date");
     }
 
     public String getReference() {
@@ -185,5 +194,9 @@ public class InvestmentTransaction implements Serializable {
 
     public void setTransactionStatus(String transactionStatus) {
         this.transactionStatus = transactionStatus;
+    }
+
+    public HashMap<String, Object> getDatePaidObj() {
+        return datePaidObj;
     }
 }

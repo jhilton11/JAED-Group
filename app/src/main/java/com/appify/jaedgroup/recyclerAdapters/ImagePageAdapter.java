@@ -5,6 +5,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 
+import com.appify.jaedgroup.R;
 import com.appify.jaedgroup.model.CarouselItem;
 import com.bumptech.glide.Glide;
 
@@ -28,7 +29,7 @@ public class ImagePageAdapter extends PagerAdapter {
     public Object instantiateItem(@NonNull ViewGroup container, int position) {
         ImageView imageView = new ImageView(context);
         imageView.setScaleType(ImageView.ScaleType.CENTER_CROP);
-        Glide.with(context).load(items.get(position).getImgUrl()).into(imageView);
+        Glide.with(context).load(items.get(position).getImgUrl()).placeholder(R.drawable.background).into(imageView);
         container.addView(imageView);
         return imageView;
     }

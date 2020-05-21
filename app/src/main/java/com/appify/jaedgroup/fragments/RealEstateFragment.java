@@ -99,17 +99,19 @@ public class RealEstateFragment extends Fragment {
             estateRef.addSnapshotListener(new EventListener<QuerySnapshot>() {
                 @Override
                 public void onEvent(@Nullable QuerySnapshot queryDocumentSnapshots, @Nullable FirebaseFirestoreException e) {
-                    estateArrayList = new ArrayList<>();
-                    for (DocumentSnapshot snapshot: queryDocumentSnapshots.getDocuments()) {
-                        Estate estate = snapshot.toObject(Estate.class);
-                        estateArrayList.add(estate);
-                    }
-                    Log.d("msg", estateArrayList.size()+" estates discovered");
-                    EstateRecyclerAdapter adapter = new EstateRecyclerAdapter(estateArrayList, mListener);
-                    recyclerView.setAdapter(adapter);
+                    if (e == null) {
+                        estateArrayList = new ArrayList<>();
+                        for (DocumentSnapshot snapshot: queryDocumentSnapshots.getDocuments()) {
+                            Estate estate = snapshot.toObject(Estate.class);
+                            estateArrayList.add(estate);
+                        }
+                        Log.d("msg", estateArrayList.size()+" estates discovered");
+                        EstateRecyclerAdapter adapter = new EstateRecyclerAdapter(estateArrayList, mListener);
+                        recyclerView.setAdapter(adapter);
 
-                    if (dialog.isShowing()) {
-                        dialog.dismiss();
+                        if (dialog.isShowing()) {
+                            dialog.dismiss();
+                        }
                     }
                 }
             });

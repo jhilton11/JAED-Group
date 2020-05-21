@@ -6,8 +6,6 @@ import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
-import android.widget.EditText;
-import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -24,16 +22,11 @@ import com.google.android.gms.tasks.Task;
 import com.google.android.material.textfield.TextInputEditText;
 import com.google.firebase.auth.AuthCredential;
 import com.google.firebase.auth.AuthResult;
-import com.google.firebase.auth.FacebookAuthProvider;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.auth.GoogleAuthProvider;
-import com.google.firebase.database.DatabaseReference;
-import com.google.firebase.firestore.CollectionReference;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.FirebaseFirestore;
-
-import java.util.Arrays;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -104,7 +97,7 @@ public class LoginActivity extends AppCompatActivity {
     protected void onStart() {
         super.onStart();
 
-        dialog.show();
+        Log.d("onStart", "Dialog should show");
         mAuth = FirebaseAuth.getInstance();
         FirebaseUser user = mAuth.getCurrentUser();
 
@@ -112,13 +105,13 @@ public class LoginActivity extends AppCompatActivity {
             if (user.isEmailVerified()) {
                 dialog.dismiss();
                 signIn();
+                Log.d("onStart", "User is email verified");
             } else {
-                dialog.dismiss();
                 displayVerifyEmailView();
                 Log.d("tag", "Email is not verified");
             }
         } else {
-            dialog.dismiss();
+            Log.d("onStart", "User is not signed in");
         }
     }
 
@@ -127,16 +120,21 @@ public class LoginActivity extends AppCompatActivity {
         super.onActivityResult(requestCode, resultCode, data);
 
         if (requestCode == RC_SIGN_IN) {
-            Task<GoogleSignInAccount> task = GoogleSignIn.getSignedInAccountFromIntent(data);
-            try {
-                dialog.setCancelable(false);
-                dialog.setMessage("Please wait....");
-                GoogleSignInAccount account = task.getResult(ApiException.class);
-                firebaseAuthWithGoogle(account);
-                Log.d("msg", "Successfully logged into google");
-            } catch (ApiException e) {
-                Log.w("error", ""+task.getException().toString());
-                tasks.makeSnackbar(layout, "Unable to log in " + task.getException().getMessage());
+            if (resultCode == RESULT_OK) {
+                Task<GoogleSignInAccount> task = GoogleSignIn.getSignedInAccountFromIntent(data);
+                try {
+                    dialog.setCancelable(false);
+                    dialog.setMessage("Please wait....");
+                    GoogleSignInAccount account = task.getResult(ApiException.class);
+                    firebaseAuthWithGoogle(account);
+                    Log.d("msg", "Successfully logged into google");
+                } catch (ApiException e) {
+                    Log.w("error", ""+task.getException().toString());
+                    tasks.makeSnackbar(layout, "Unable to log in " + task.getException().getMessage());
+                    dialog.dismiss();
+                }
+            } else {
+                dialog.dismiss();
             }
         }
     }
@@ -153,6 +151,7 @@ public class LoginActivity extends AppCompatActivity {
     }
 
     private void signIn() {
+        Toast.makeText(this, "Sign in successful", Toast.LENGTH_SHORT).show();
         String id = mAuth.getCurrentUser().getUid();
         User user = createUser();
         DocumentReference userRef = FirebaseFirestore.getInstance().collection("users").document(id);
@@ -180,6 +179,8 @@ public class LoginActivity extends AppCompatActivity {
                             signIn();
                         } else {
                             tasks.makeSnackbar(layout, "Unable to log in " + task.getException().getMessage());
+                            dialog.dismiss();
+                            Log.d("firebaseAuthWithGoogle", task.getException().toString());
                         }
                     }
                 });
@@ -249,7 +250,8 @@ public class LoginActivity extends AppCompatActivity {
     //ToDo: Display view to make user verify email
     private void displayVerifyEmailView() {
         verifyEmailTv.setVisibility(View.VISIBLE);
-        verifyEmailTv.setText("You have not been verified. Please check your email to activate your account");
+        verifyEmailTv.setText("Thank you for signing up. " +
+                "But your email " + mAuth.getCurrentUser().getEmail() +" has not been verified. Please check your mail to activate your account");
         verifyEmailBtn.setVisibility(View.VISIBLE);
         verifyEmailBtn.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -265,7 +267,7 @@ public class LoginActivity extends AppCompatActivity {
             @Override
             public void onComplete(@NonNull Task<Void> task) {
                 if (task.isSuccessful()) {
-                    Toast.makeText(LoginActivity.this, "Please verify your email", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(LoginActivity.this, "Verification email has been sent. Please verify your email", Toast.LENGTH_LONG).show();
                 }
             }
         });

@@ -70,8 +70,10 @@ public class ViewTransactionsFragment extends Fragment {
             public void onTabSelected(TabLayout.Tab tab) {
                 if (tab.getText().equals("Estates")) {
                     loadEstateTransactions();
+                    Log.d("tabClicked", "Estate transactions clicked");
                 } else {
                     loadInvestmentTransactions();
+                    Log.d("tabClicked", "Investment transactions clicked");
                 }
             }
 
@@ -82,9 +84,11 @@ public class ViewTransactionsFragment extends Fragment {
             @Override
             public void onTabReselected(TabLayout.Tab tab) {
                 if (tab.getText().equals("Estates")) {
+                    Log.d("tabClicked", "Estate transactions clicked");
                     loadEstateTransactions();
                 } else {
                     loadInvestmentTransactions();
+                    Log.d("tabClicked", "Investment transactions clicked");
                 }
             }
         });
@@ -138,7 +142,7 @@ public class ViewTransactionsFragment extends Fragment {
     }
 
     private void loadInvestmentTransactions() {
-        CollectionReference colRef = FirebaseFirestore.getInstance().collection("investments");
+        CollectionReference colRef = FirebaseFirestore.getInstance().collection("investmentTransaction");
         Query query = colRef.whereEqualTo("userId", FirebaseAuth.getInstance().getCurrentUser().getUid());
         query.addSnapshotListener(new EventListener<QuerySnapshot>() {
             @Override

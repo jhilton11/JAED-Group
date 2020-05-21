@@ -5,6 +5,8 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 
+import com.appify.jaedgroup.R;
+import com.appify.jaedgroup.model.EstateImage;
 import com.bumptech.glide.Glide;
 
 import java.util.ArrayList;
@@ -13,10 +15,10 @@ import androidx.annotation.NonNull;
 import androidx.viewpager.widget.PagerAdapter;
 
 public class ImageAdapter extends PagerAdapter {
-    private ArrayList<String> items;
+    private ArrayList<EstateImage> items;
     private Context context;
 
-    public ImageAdapter(ArrayList<String> items, Context context) {
+    public ImageAdapter(ArrayList<EstateImage> items, Context context) {
         this.items = items;
         this.context = context;
     }
@@ -26,7 +28,7 @@ public class ImageAdapter extends PagerAdapter {
     public Object instantiateItem(@NonNull ViewGroup container, int position) {
         ImageView imageView = new ImageView(context);
         imageView.setScaleType(ImageView.ScaleType.CENTER_CROP);
-        Glide.with(context).load(items.get(position)).into(imageView);
+        Glide.with(context).load(items.get(position).getImageUrl()).placeholder(R.drawable.background).into(imageView);
         container.addView(imageView);
         return imageView;
     }

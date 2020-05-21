@@ -32,7 +32,7 @@ public class OnBoardingScreenActivity extends MaterialIntroActivity {
         addSlide(new SlideFragmentBuilder()
                 .backgroundColor(R.color.colorPrimaryDark)
                 .title("")
-                .description("")
+                .description("Description of Slide 3")
                 .build(),
         new MessageButtonBehaviour(new View.OnClickListener() {
             @Override

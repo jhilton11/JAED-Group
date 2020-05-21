@@ -28,18 +28,15 @@ import com.appify.jaedgroup.utils.tasks;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.TimeZone;
 
 public class CompleteInvestmentActivity extends AppCompatActivity {
-    private static final int LOCATION_REQUEST_CODE = 101;
     private TextView totalTv, infoTv, todayDateTv, futureDateTv;
     private EditText amountTv;
     private Button payBtn;
     private View layout;
     private double amount;
-    private String todayDate, futureDate;
     private static String NAIRA = Constants.getCurrencySymbol();
-    private LocationManager manager;
-    private Location location;
     private InvestmentTransaction transaction;
 
     @Override
@@ -56,8 +53,6 @@ public class CompleteInvestmentActivity extends AppCompatActivity {
         payBtn = findViewById(R.id.pay_btn);
 
         transaction = (InvestmentTransaction)getIntent().getSerializableExtra("transaction");
-
-        getTime();
 
         payBtn.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -88,20 +83,8 @@ public class CompleteInvestmentActivity extends AppCompatActivity {
         });
     }
 
-    @Override
-    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
-        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
-
-        if (requestCode == LOCATION_REQUEST_CODE) {
-            getTime();
-        }
-    }
-
     private void makePayment() {
         amount = Double.parseDouble(amountTv.getText().toString().trim());
-        transaction.setDatePaid(todayDate);
-        transaction.setMaturityDate(futureDate);
-        transaction.setDatePaidLong(location.getTime());
 
         if (amount>=200000) {
             transaction.setAmountPaid(amount);
@@ -111,48 +94,5 @@ public class CompleteInvestmentActivity extends AppCompatActivity {
         } else {
             tasks.makeSnackbar(layout, "The minimum amount of you can invest is #200,000");
         }
-    }
-
-    private void getTime() {
-        manager = (LocationManager) this.getSystemService(LOCATION_SERVICE);
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-            if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED
-                    && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-                ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.ACCESS_COARSE_LOCATION, Manifest.permission.ACCESS_FINE_LOCATION}, LOCATION_REQUEST_CODE);
-            } else {
-                location = manager.getLastKnownLocation(LocationManager.NETWORK_PROVIDER);
-                Long time = location.getTime();
-                Date date = new Date(time);
-                SimpleDateFormat format = new SimpleDateFormat("dd/MM/yyyy");
-                todayDate = format.format(date);
-                todayDateTv.setText("Start Date: " + todayDate);
-                Log.d(getClass().getSimpleName(), "Today's date: " + todayDate);
-                futureDate = getFutureDate(date);
-                futureDateTv.setText("Maturity Date: " + futureDate);
-                Log.d(getClass().getSimpleName(), "Today's date: " + futureDate);
-            }
-        } else {
-            location = manager.getLastKnownLocation(LocationManager.NETWORK_PROVIDER);
-            Long time = location.getTime();
-            Log.d(getClass().getSimpleName(), "Time from location manager: " + time);
-            Date date = new Date(time);
-            SimpleDateFormat format = new SimpleDateFormat("dd/MM/yyyy");
-            todayDate = format.format(date);
-            todayDateTv.setText("Start Date: " + todayDate);
-            Log.d(getClass().getSimpleName(), "Today's date: " + todayDate);
-            futureDate = getFutureDate(date);
-            futureDateTv.setText("Maturity Date: " + futureDate);
-            Log.d(getClass().getSimpleName(), "Today's date: " + futureDate);
-        }
-    }
-
-    private String getFutureDate(Date dt) {
-        String temp = "";
-        Calendar cal = Calendar.getInstance();
-        cal.setTime(dt);
-        cal.add(Calendar.YEAR, 1);
-        SimpleDateFormat dateFormat = new SimpleDateFormat("dd/MM/yyyy");
-        temp = dateFormat.format(cal.getTime());
-        return temp;
     }
 }

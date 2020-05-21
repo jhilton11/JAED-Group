@@ -110,7 +110,7 @@ public class OrderSummaryActivity extends AppCompatActivity {
                         for (DocumentSnapshot snapshot: queryDocumentSnapshots.getDocuments()) {
                             EstatesInfo info = snapshot.toObject(EstatesInfo.class);
                             arrayList.add(info);
-                            prices.put(info.getSize() + "sq m:\t\t" + naira + tasks.getCurrencyString(info.getPrice()), info.getPrice());
+                            prices.put(info.getSize() + "\t\t\t" + naira + tasks.getCurrencyString(info.getPrice()), info.getPrice());
                         }
                         populateRadioGroup(arrayList);
                         dialog.dismiss();
@@ -131,7 +131,7 @@ public class OrderSummaryActivity extends AppCompatActivity {
     private void populateRadioGroup(ArrayList<EstatesInfo> infos) {
         for (EstatesInfo info: infos) {
             RadioButton rb = new RadioButton(this);
-            rb.setText(info.getSize() + "sq m:\t\t" + naira + tasks.getCurrencyString(info.getPrice()));
+            rb.setText(info.getSize() + "\t\t\t" + naira + tasks.getCurrencyString(info.getPrice()));
             radioGroup.addView(rb);
         }
     }

@@ -37,7 +37,7 @@ public class InvestmentTransactionAdapter extends RecyclerView.Adapter<Investmen
         InvestmentTransaction transaction = transactions.get(position);
         holder.amountTv.setText(String.valueOf(transaction.getAmountPaid()));
         holder.maturityDateTv.setText(transaction.getMaturityDate());
-        holder.indateTv.setText(transaction.getDatePaid());
+        holder.indateTv.setText(transaction.getDatePaidLong() + "");
     }
 
     @Override

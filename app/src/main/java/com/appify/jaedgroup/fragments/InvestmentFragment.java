@@ -55,6 +55,8 @@ public class InvestmentFragment extends Fragment {
         viewInvestmentsBtn = view.findViewById(R.id.view_investments_btn);
         indicator = view.findViewById(R.id.circular_indicator);
 
+        loadCarouselImages();
+
         newInvestmentBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -68,8 +70,6 @@ public class InvestmentFragment extends Fragment {
                 viewInvestments();
             }
         });
-
-        loadCarouselImages();
 
         return view;
     }
@@ -104,17 +104,21 @@ public class InvestmentFragment extends Fragment {
         colRef.addSnapshotListener(new EventListener<QuerySnapshot>() {
             @Override
             public void onEvent(@Nullable QuerySnapshot queryDocumentSnapshots, @Nullable FirebaseFirestoreException e) {
-                ArrayList<CarouselItem> items = new ArrayList<>();
-                for (DocumentSnapshot snapshot: queryDocumentSnapshots.getDocuments()) {
-                    CarouselItem item = snapshot.toObject(CarouselItem.class);
-                    items.add(item);
-                }
-                Log.d(getClass().getSimpleName(), items.size() + " items");
+                if (e==null) {
+                    if (!queryDocumentSnapshots.isEmpty()) {
+                        ArrayList<CarouselItem> items = new ArrayList<>();
+                        for (DocumentSnapshot snapshot: queryDocumentSnapshots.getDocuments()) {
+                            CarouselItem item = snapshot.toObject(CarouselItem.class);
+                            items.add(item);
+                        }
+                        Log.d(getClass().getSimpleName(), items.size() + " items");
 
-                adapter = new ImagePageAdapter(items, getContext());
-                viewPager.setAdapter(adapter);
-                indicator.setViewPager(viewPager);
-                setupCarousel(items.size());
+                        adapter = new ImagePageAdapter(items, getContext());
+                        viewPager.setAdapter(adapter);
+                        indicator.setViewPager(viewPager);
+                        setupCarousel(items.size());
+                    }
+                }
             }
         });
     }

@@ -7,6 +7,7 @@ import android.os.Bundle;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
+import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -23,11 +24,6 @@ import com.appify.jaedgroup.recyclerAdapters.EstateRecyclerAdapter;
 import com.appify.jaedgroup.utils.tasks;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
-import com.google.firebase.database.DataSnapshot;
-import com.google.firebase.database.DatabaseError;
-import com.google.firebase.database.DatabaseReference;
-import com.google.firebase.database.FirebaseDatabase;
-import com.google.firebase.database.ValueEventListener;
 import com.google.firebase.firestore.CollectionReference;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
@@ -62,7 +58,9 @@ public class RealEstateFragment extends Fragment {
         connectionStatusTv = view.findViewById(R.id.connection_status_tv);
         dialog = new ProgressDialog(getContext());
         recyclerView = view.findViewById(R.id.recyclerview);
-        recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
+        //recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
+        recyclerView.setLayoutManager(new GridLayoutManager(getContext(), 2));
+        recyclerView.setHasFixedSize(true);
 
         loadData();
 

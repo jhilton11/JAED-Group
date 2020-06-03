@@ -1,5 +1,6 @@
 package com.appify.jaedgroup.fragments;
 
+import android.app.ProgressDialog;
 import android.content.Context;
 import android.net.Uri;
 import android.os.Bundle;
@@ -22,8 +23,6 @@ import com.appify.jaedgroup.utils.tasks;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.database.DatabaseReference;
-import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.firestore.CollectionReference;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.FirebaseFirestore;
@@ -42,10 +41,11 @@ public class ContactUsFragment extends Fragment {
     private EditText msgEt;
     private Button sendBtn;
     private View layout;
+    private ProgressDialog dialog;
 
     private Handler mHandler;
 
-    private OnFragmentInteractionListener mListener;
+    //private OnFragmentInteractionListener mListener;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -58,6 +58,7 @@ public class ContactUsFragment extends Fragment {
         msgEt = view.findViewById(R.id.message_et);
         sendBtn = view.findViewById(R.id.send_btn);
         layout = getActivity().findViewById(R.id.layout);
+        dialog = new ProgressDialog(getContext());
 
         mHandler = new Handler();
 
@@ -79,6 +80,7 @@ public class ContactUsFragment extends Fragment {
             @Override
             public void onClick(View view) {
                 if (tasks.checkNetworkStatus(getContext())) {
+                    dialog.show();
                     sendMessage();
                 } else {
                     tasks.makeSnackbar(layout,"Phone not connect to Internet. Pls connect and try again");
@@ -103,7 +105,7 @@ public class ContactUsFragment extends Fragment {
     @Override
     public void onDetach() {
         super.onDetach();
-        mListener = null;
+        //mListener = null;
     }
 
     public interface OnFragmentInteractionListener {
@@ -128,9 +130,12 @@ public class ContactUsFragment extends Fragment {
                 if (task.isSuccessful()) {
                     Toast.makeText(getContext(), "Message successfully sent", Toast.LENGTH_LONG).show();
                     clearFields();
+                    dialog.dismiss();
                 } else {
                     Toast.makeText(getContext(), "Message not successfully sent", Toast.LENGTH_LONG).show();
                     Log.e("msg", task.getException().toString());
+                    Toast.makeText(getContext(), task.getException().toString(), Toast.LENGTH_SHORT).show();
+                    dialog.dismiss();
                 }
             }
         });

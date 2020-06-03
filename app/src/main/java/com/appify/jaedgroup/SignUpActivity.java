@@ -48,6 +48,7 @@ public class SignUpActivity extends AppCompatActivity {
         signInText = findViewById(R.id.signin_text);
 
         dialog = new ProgressDialog(this);
+        dialog.setCanceledOnTouchOutside(false);
 
         signUnBtn.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -70,6 +71,7 @@ public class SignUpActivity extends AppCompatActivity {
     private void signUp() {
         if (verifyInput()) {
             dialog.show();
+            dialog.setCanceledOnTouchOutside(false);
             String name = nameEt.getText().toString();
             String email = emailEt.getText().toString();
             String password = passwordEt.getText().toString();
@@ -82,14 +84,22 @@ public class SignUpActivity extends AppCompatActivity {
                         FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
                         user.sendEmailVerification().addOnCompleteListener(new OnCompleteListener<Void>() {
                             @Override
-                            public void onComplete(@NonNull Task<Void> task) {
+                            public void onComplete(@NonNull Task<Void> task2) {
                                 if (task.isSuccessful()) {
                                     dialog.dismiss();
                                     Toast.makeText(SignUpActivity.this, "Please verify your email. An activation email has been sent to " + user.getEmail(), Toast.LENGTH_LONG).show();
                                     finish();
+                                } else {
+                                    dialog.dismiss();
+                                    Log.d("Signup", task2.getException().toString());
+                                    tasks.displayAlertDialog(SignUpActivity.this,"", task2.getException().getMessage());
                                 }
                             }
                         });
+                    } else {
+                        dialog.dismiss();
+                        Log.d("Signup", task.getException().toString());
+                        tasks.displayAlertDialog(SignUpActivity.this, "", task.getException().getMessage());
                     }
                 }
             });
@@ -101,7 +111,7 @@ public class SignUpActivity extends AppCompatActivity {
             nameTl.setError("Name field is empty");
             return false;
         } else if (passwordEt.getText().length()<8){
-            passwordTl.setError("Password field must be at least 8 characters long");
+            passwordTl.setError("Password must be at least 8 characters long");
             return false;
         }  else if (!tasks.validateEmail(emailEt.getText().toString())) {
             emailTl.setError("Email address is not valid");

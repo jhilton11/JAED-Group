@@ -23,6 +23,8 @@ import com.bumptech.glide.Glide;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.auth.UserProfileChangeRequest;
 import com.google.firebase.firestore.CollectionReference;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
@@ -45,6 +47,7 @@ public class EditProfileActivity extends AppCompatActivity {
     private View layout;
 
     private String id = FirebaseAuth.getInstance().getCurrentUser().getUid();
+    private FirebaseUser user;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -83,6 +86,10 @@ public class EditProfileActivity extends AppCompatActivity {
 
         updateUI();
 
+        getSupportActionBar().setTitle("Edit Profile");
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        getSupportActionBar().setHomeButtonEnabled(true);
+
     }
 
     private void changeImage() {
@@ -90,6 +97,12 @@ public class EditProfileActivity extends AppCompatActivity {
         intent.setType("image/*");
         intent.setAction(Intent.ACTION_PICK);
         startActivityForResult(intent, Constants.PICK_IMAGE);
+    }
+
+    @Override
+    public boolean onSupportNavigateUp() {
+        onBackPressed();
+        return super.onSupportNavigateUp();
     }
 
     @Override
@@ -118,6 +131,7 @@ public class EditProfileActivity extends AppCompatActivity {
                             }
                         });
                     } else {
+                        dialog.dismiss();
                         Log.d("msg", "Unable to upload because: " + task.getException());
                     }
                 }
@@ -128,41 +142,38 @@ public class EditProfileActivity extends AppCompatActivity {
     }
 
     private void addtoDatabase(String imageUrl) {
-        User user = new User(id, nameEt.getText().toString(), phoneEt.getText().toString());
-        user.setImageUrl(imageUrl);
-        user.setEmail(FirebaseAuth.getInstance().getCurrentUser().getEmail());
-        CollectionReference colRef = FirebaseFirestore.getInstance().collection("users");
-        DocumentReference docRef = colRef.document(id);
-        docRef.set(user).addOnCompleteListener(new OnCompleteListener<Void>() {
-            @Override
-            public void onComplete(@NonNull Task<Void> task) {
-                Toast.makeText(EditProfileActivity.this, "Profile updated successfully", Toast.LENGTH_SHORT).show();
-                dialog.dismiss();
-                finish();
-            }
-        });
+        UserProfileChangeRequest profileUpdates = new UserProfileChangeRequest.Builder()
+                .setDisplayName(nameEt.getText().toString())
+                .setPhotoUri(Uri.parse(imageUrl))
+                .build();
+
+        user.updateProfile(profileUpdates)
+                .addOnCompleteListener(new OnCompleteListener<Void>() {
+                    @Override
+                    public void onComplete(@NonNull Task<Void> task) {
+                        if (task.isSuccessful()) {
+                            Log.d("addToDatabase", "User profile updated.");
+                            Toast.makeText(EditProfileActivity.this, "Profile updated", Toast.LENGTH_SHORT).show();
+                            finish();
+                        }
+                    }
+                });
     }
 
     private void updateUI() {
-        CollectionReference colRef = FirebaseFirestore.getInstance().collection("users");
-        DocumentReference docRef = colRef.document(id);
-        docRef.get().addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
-            @Override
-            public void onComplete(@NonNull Task<DocumentSnapshot> task) {
-                User user = task.getResult().toObject(User.class);
-                if (user.getName()!=null && user.getName().length()>0) {
-                    nameEt.setText(user.getName());
-                }
+        user = FirebaseAuth.getInstance().getCurrentUser();
 
-                if (!TextUtils.isEmpty(user.getPhoneNo())) {
-                    phoneEt.setText(user.getPhoneNo());
-                }
+        if (user.getDisplayName() != null) {
+            nameEt.setText(user.getDisplayName());
+        }
 
-                if (!TextUtils.isEmpty(user.getImageUrl())) {
-                    Glide.with(getApplicationContext()).load(user.getImageUrl()).into(profileImage);
-                }
-            }
-        });
+        if (user.getPhoneNumber() != null) {
+            phoneEt.setText(user.getPhoneNumber());
+        }
+
+        if (user.getPhotoUrl() != null) {
+            Glide.with(this).load(user.getPhotoUrl()).into(profileImage);
+        }
     }
 
 }

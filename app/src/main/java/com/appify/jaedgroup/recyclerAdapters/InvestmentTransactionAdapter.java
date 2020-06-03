@@ -8,6 +8,8 @@ import android.widget.TextView;
 
 import com.appify.jaedgroup.R;
 import com.appify.jaedgroup.model.InvestmentTransaction;
+import com.appify.jaedgroup.utils.Constants;
+import com.appify.jaedgroup.utils.tasks;
 
 import java.util.ArrayList;
 
@@ -35,9 +37,8 @@ public class InvestmentTransactionAdapter extends RecyclerView.Adapter<Investmen
     @Override
     public void onBindViewHolder(@NonNull Holder holder, int position) {
         InvestmentTransaction transaction = transactions.get(position);
-        holder.amountTv.setText(String.valueOf(transaction.getAmountPaid()));
-        holder.maturityDateTv.setText(transaction.getMaturityDate());
-        holder.indateTv.setText(transaction.getDatePaidLong() + "");
+        holder.amountTv.setText(Constants.NAIRA + tasks.getCurrencyString(transaction.getAmountPaid()));
+        holder.indateTv.setText(transaction.getDatePaidString());
     }
 
     @Override
@@ -46,13 +47,11 @@ public class InvestmentTransactionAdapter extends RecyclerView.Adapter<Investmen
     }
 
     public static class Holder extends RecyclerView.ViewHolder {
-        TextView amountTv, indateTv, maturityDateTv, daysLeftTv;
+        TextView amountTv, indateTv;
         public Holder(@NonNull View itemView) {
             super(itemView);
             amountTv = itemView.findViewById(R.id.amount_tv);
             indateTv = itemView.findViewById(R.id.investment_date_tv);
-            maturityDateTv = itemView.findViewById(R.id.maturity_date_tv);
-            daysLeftTv = itemView.findViewById(R.id.num_of_days_left_tv);
         }
     }
 }

@@ -15,8 +15,8 @@ import android.app.ProgressDialog;
 import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.text.TextUtils;
 import android.util.Log;
-import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
@@ -24,6 +24,7 @@ import android.widget.Toast;
 
 import com.appify.jaedgroup.model.EstateTransaction;
 import com.appify.jaedgroup.services.PaystackService;
+import com.appify.jaedgroup.utils.Constants;
 import com.appify.jaedgroup.utils.RetrofitInstance;
 import com.appify.jaedgroup.utils.TextFormatters;
 import com.appify.jaedgroup.utils.tasks;
@@ -37,16 +38,16 @@ import java.io.InputStreamReader;
 import java.net.URL;
 
 public class CardPaymentActivity extends AppCompatActivity {
-    private EditText cardCvvEt, cardEt, cardExpEt;
+    private EditText cardEt, cardExpEt, cardCvv;
     private Button payBtn;
-    private TextView amountTv;
     private ProgressDialog dialog;
-    private Card card;
     private EstateTransaction trans;
 
     private int amount;
 
+    private StringBuilder sbError;
     private static final String backend_url = "https://jaed-test-app.herokuapp.com";
+    private static final String backend_live_url = "https://jaed-group.herokuapp.com";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -55,13 +56,19 @@ public class CardPaymentActivity extends AppCompatActivity {
 
         trans = (EstateTransaction) getIntent().getSerializableExtra("transaction");
         if (trans != null) {
-            amount = trans.getAmountPaid();
+            TextView estateName = findViewById(R.id.estate_name);
+            TextView landType = findViewById(R.id.land_type);
+            TextView amountTv = findViewById(R.id.total_tv);
+
+            estateName.setText("Estate: " + trans.getEstateName());
+            landType.setText("Option selected: " + trans.getEstateType());
+            amount = trans.getAmountPaid()/100;
+            amountTv.setText("Total: " + Constants.NAIRA + tasks.getCurrencyString(amount));
         }
 
-        cardEt = findViewById(R.id.card_number_et);
-        cardCvvEt = findViewById(R.id.card_cvv);
         cardExpEt = findViewById(R.id.card_expiry_et);
-        amountTv = findViewById(R.id.total_tv);
+        cardEt = findViewById(R.id.card_number_et);
+        cardCvv = findViewById(R.id.card_cvv);
         payBtn = findViewById(R.id.pay_btn);
 
         formatInputs();
@@ -70,16 +77,21 @@ public class CardPaymentActivity extends AppCompatActivity {
 
         dialog = new ProgressDialog(this);
 
-        amountTv.setText("#" + tasks.getCurrencyString(amount));
-
-        payBtn.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                performTest();
+        payBtn.setOnClickListener(view -> {
+            if (tasks.checkNetworkStatus(CardPaymentActivity.this)) {
+                makePayment();
             }
         });
 
+        getSupportActionBar().setTitle("Make Payment");
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        getSupportActionBar().setHomeButtonEnabled(true);
+    }
 
+    @Override
+    public boolean onSupportNavigateUp() {
+        onBackPressed();
+        return super.onSupportNavigateUp();
     }
 
     private void performCharge(Card card) {
@@ -115,9 +127,47 @@ public class CardPaymentActivity extends AppCompatActivity {
                 //TODO: Handle error details here.
                 trans.setReference(transaction.getReference());
                 dialog.dismiss();
-                Toast.makeText(CardPaymentActivity.this, "Transaction failed. Details:"+error.getMessage(), Toast.LENGTH_SHORT).show();
+                tasks.displayAlertDialog(CardPaymentActivity.this,"Transaction failed", error.getMessage());
             }
         });
+    }
+
+    private boolean verifyInput() {
+        sbError = new StringBuilder("The following fields have not been filled: ");
+        boolean cardValid = true, cvvValid = true, expValid = true;
+        if (TextUtils.isEmpty(cardEt.getText().toString().trim())) {
+            cardValid = false;
+            sbError.append("Card number, ");
+        }
+        if (TextUtils.isEmpty(cardCvv.getText().toString().trim())) {
+            cvvValid = false;
+            sbError.append("CVV, ");
+        }
+        if (TextUtils.isEmpty(cardExpEt.getText().toString()) || cardExpEt.getText().length() <5) {
+            expValid = false;
+            sbError.append("Expiry Date, ");
+        }
+
+        return cardValid && cvvValid && expValid;
+    }
+
+    private void makePayment() {
+        if (verifyInput()) {
+            int month = Integer.parseInt(cardExpEt.getText().toString().trim().substring(0, 2));
+            int year = 2000 + Integer.parseInt(cardExpEt.getText().toString().trim().substring(3,5));
+            String cv = cardCvv.getText().toString();
+            String cn = cardEt.getText().toString().trim();
+            Card testCard = new Card(cn, month, year, cv);
+            if (testCard.isValid()) {
+                Log.d("test_card", "Card type: " + testCard.getType());
+                performCharge(testCard);
+            } else {
+                Log.d("onClick", "Card not valid");
+                Toast.makeText(CardPaymentActivity.this, "Card not valid", Toast.LENGTH_SHORT).show();
+            }
+        }else {
+            Toast.makeText(this, sbError.toString(), Toast.LENGTH_SHORT).show();
+        }
     }
 
     private void performTest () {
@@ -126,7 +176,7 @@ public class CardPaymentActivity extends AppCompatActivity {
         int expiryYear = 21;
         String cvv = "123";
 
-        card = new co.paystack.android.model.Card(cardNumber, expiryMonth, expiryYear, cvv);
+        Card card = new Card(cardNumber, expiryMonth, expiryYear, cvv);
         performCharge(card);
     }
 
@@ -170,15 +220,15 @@ public class CardPaymentActivity extends AppCompatActivity {
         protected void onPostExecute(String result) {
             super.onPostExecute(result);
             if (result != null) {
-                Toast.makeText(CardPaymentActivity.this, "Congrats payment is successful", Toast.LENGTH_SHORT).show();
+                Toast.makeText(CardPaymentActivity.this, "Payment is successful", Toast.LENGTH_SHORT).show();
                 dialog.dismiss();
                 trans.setTransactionStatus("Successful");
                 sendTransactionToDatabase();
             } else {
+                tasks.displayAlertDialog(CardPaymentActivity.this, "Payment failed", "Reason: " + result);
                 Toast.makeText(CardPaymentActivity.this, "Sorry payment failed", Toast.LENGTH_SHORT).show();
                 trans.setTransactionStatus("Failed");
                 sendTransactionToDatabase();
-                dialog.dismiss();
             }
 
             if (error != null) {
@@ -190,7 +240,7 @@ public class CardPaymentActivity extends AppCompatActivity {
         protected String doInBackground(String... reference) {
             try {
                 this.reference = reference[0];
-                URL url = new URL(backend_url + "/verify/" + this.reference);
+                URL url = new URL(backend_live_url + "/verify/" + this.reference);
                 BufferedReader in = new BufferedReader(
                         new InputStreamReader(
                                 url.openStream()));
@@ -212,10 +262,12 @@ public class CardPaymentActivity extends AppCompatActivity {
             @Override
             public void onComplete(@NonNull Task<Void> task) {
                 if (task.isSuccessful()) {
-                    Toast.makeText(CardPaymentActivity.this, "Transaction successfully added", Toast.LENGTH_SHORT).show();
-                    Log.d(getClass().getSimpleName(), "Estate successfully added");
+                    dialog.dismiss();
+                    //Toast.makeText(CardPaymentActivity.this, "Transaction successfully added", Toast.LENGTH_SHORT).show();
+                    Log.d(getClass().getSimpleName(), "Transaction successfully added");
                     startActivity(new Intent(CardPaymentActivity.this, TransactionResultActivity.class));
                 } else {
+                    dialog.dismiss();
                     Log.d(getClass().getSimpleName(), "Unable to add estate to database");
                 }
             }

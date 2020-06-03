@@ -64,6 +64,8 @@ public class LoginActivity extends AppCompatActivity {
         usernameEt = findViewById(R.id.et_username);
         passwordEt = findViewById(R.id.et_password);
 
+        dialog.setCancelable(false);
+
         GoogleSignInOptions gso = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
                 .requestIdToken(getString(R.string.default_web_client_id))
                 .requestEmail()
@@ -123,17 +125,17 @@ public class LoginActivity extends AppCompatActivity {
             if (resultCode == RESULT_OK) {
                 Task<GoogleSignInAccount> task = GoogleSignIn.getSignedInAccountFromIntent(data);
                 try {
-                    dialog.setCancelable(false);
                     dialog.setMessage("Please wait....");
                     GoogleSignInAccount account = task.getResult(ApiException.class);
                     firebaseAuthWithGoogle(account);
                     Log.d("msg", "Successfully logged into google");
                 } catch (ApiException e) {
                     Log.w("error", ""+task.getException().toString());
-                    tasks.makeSnackbar(layout, "Unable to log in " + task.getException().getMessage());
+                    tasks.makeSnackbar(layout, "Unable to log in " + task.getException().toString());
                     dialog.dismiss();
                 }
             } else {
+                tasks.displayAlertDialog(LoginActivity.this, "Login failure", "Unable to login to google. This service requires Google Play Services. Please make Google Play is running on your device and then reboot");
                 dialog.dismiss();
             }
         }
@@ -151,20 +153,10 @@ public class LoginActivity extends AppCompatActivity {
     }
 
     private void signIn() {
-        Toast.makeText(this, "Sign in successful", Toast.LENGTH_SHORT).show();
-        String id = mAuth.getCurrentUser().getUid();
-        User user = createUser();
-        DocumentReference userRef = FirebaseFirestore.getInstance().collection("users").document(id);
-        userRef.set(user).addOnCompleteListener(new OnCompleteListener<Void>() {
-            @Override
-            public void onComplete(@NonNull Task<Void> task) {
-                if (task.isSuccessful()) {
-                    Intent intent = new Intent(LoginActivity.this, MainActivity.class);
-                    startActivity(intent);
-                    finish();
-                }
-            }
-        });
+        Log.d("login", "Login successful");
+        Intent intent = new Intent(LoginActivity.this, MainActivity.class);
+        startActivity(intent);
+        finish();
     }
 
     private void firebaseAuthWithGoogle(GoogleSignInAccount account) {
@@ -201,11 +193,11 @@ public class LoginActivity extends AppCompatActivity {
                                         Log.d("msg", "Sign in with email successful");
                                         signIn();
                                     } else {
-                                        tasks.makeSnackbar(layout, "Please verify your email address");
                                         displayVerifyEmailView();
                                     }
                                 } else {
                                     dialog.dismiss();
+                                    tasks.displayAlertDialog(LoginActivity.this, "", task.getException().getMessage());
                                     Log.e("error", task.getException().toString());
                                 }
                             }
@@ -232,21 +224,6 @@ public class LoginActivity extends AppCompatActivity {
         return true;
     }
 
-    private User createUser() {
-        FirebaseUser currentUser = FirebaseAuth.getInstance().getCurrentUser();
-        User user = new User(currentUser.getUid(), currentUser.getDisplayName(), currentUser.getEmail());
-
-        if (currentUser.getPhoneNumber() != null) {
-            user.setPhoneNo(currentUser.getPhoneNumber());
-        }
-
-        if (currentUser.getPhotoUrl() != null) {
-            user.setImageUrl(currentUser.getPhotoUrl().toString());
-        }
-
-        return user;
-    }
-
     //ToDo: Display view to make user verify email
     private void displayVerifyEmailView() {
         verifyEmailTv.setVisibility(View.VISIBLE);
@@ -267,7 +244,7 @@ public class LoginActivity extends AppCompatActivity {
             @Override
             public void onComplete(@NonNull Task<Void> task) {
                 if (task.isSuccessful()) {
-                    Toast.makeText(LoginActivity.this, "Verification email has been sent. Please verify your email", Toast.LENGTH_LONG).show();
+                    tasks.displayAlertDialog(LoginActivity.this,"", "Verification email has been sent. Please verify your email");
                 }
             }
         });

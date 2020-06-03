@@ -39,11 +39,13 @@ public class OrderSummaryActivity extends AppCompatActivity {
     private ProgressDialog dialog;
     private Button button;
 
-    private Map<String, String> prices;
+    private Map<Integer, String> prices;
     private String id, estateType;
     private int price;
     private static final String naira = "₦";
+    private Map<Integer, String> estateTypeMap;
     private EstateTransaction transaction;
+    private ArrayList<EstatesInfo> arrayList;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -66,10 +68,11 @@ public class OrderSummaryActivity extends AppCompatActivity {
             @Override
             public void onCheckedChanged(RadioGroup radioGroup, int i) {
                 RadioButton rb = findViewById(i);
-                estateType = rb.getText().toString();
+                estateType = estateTypeMap.get(i);
+                Log.d("estateType", estateType);
                 transaction.setEstateType(estateType);
 
-                price = Integer.parseInt(prices.get(estateType));
+                price = Integer.parseInt(prices.get(i));
                 priceTv.setText("Price: " + naira + tasks.getCurrencyString(price));
 
                 if (!button.isEnabled()) {
@@ -106,11 +109,11 @@ public class OrderSummaryActivity extends AppCompatActivity {
                 public void onEvent(@Nullable QuerySnapshot queryDocumentSnapshots, @Nullable FirebaseFirestoreException e) {
                     if (e==null && !queryDocumentSnapshots.isEmpty()) {
                         prices = new HashMap<>();
-                        ArrayList<EstatesInfo> arrayList = new ArrayList<>();
+                        arrayList = new ArrayList<>();
                         for (DocumentSnapshot snapshot: queryDocumentSnapshots.getDocuments()) {
                             EstatesInfo info = snapshot.toObject(EstatesInfo.class);
                             arrayList.add(info);
-                            prices.put(info.getSize() + "\t\t\t" + naira + tasks.getCurrencyString(info.getPrice()), info.getPrice());
+                            //prices.put(info.getSize() + "\t\t\t" + naira + tasks.getCurrencyString(info.getPrice()), info.getPrice());
                         }
                         populateRadioGroup(arrayList);
                         dialog.dismiss();
@@ -129,10 +132,13 @@ public class OrderSummaryActivity extends AppCompatActivity {
     }
 
     private void populateRadioGroup(ArrayList<EstatesInfo> infos) {
+        estateTypeMap = new HashMap<>();
         for (EstatesInfo info: infos) {
             RadioButton rb = new RadioButton(this);
             rb.setText(info.getSize() + "\t\t\t" + naira + tasks.getCurrencyString(info.getPrice()));
             radioGroup.addView(rb);
+            prices.put(rb.getId(), info.getPrice());
+            estateTypeMap.put(rb.getId(), info.getSize());
         }
     }
 

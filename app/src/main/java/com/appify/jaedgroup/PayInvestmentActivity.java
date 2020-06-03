@@ -41,10 +41,12 @@ public class PayInvestmentActivity extends AppCompatActivity {
     private Button payBtn;
     private ProgressDialog dialog;
     private View layout;
+    private StringBuilder sbError;
 
     private InvestmentTransaction trans;
 
     private static final String backend_url = "https://jaed-test-app.herokuapp.com";
+    private static final String backend_live_url = "https://jaed-group.herokuapp.com";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -64,12 +66,11 @@ public class PayInvestmentActivity extends AppCompatActivity {
 
         formatInputs();
         totalTv.setText("Total: " + tasks.getCurrencyString(trans.getAmountPaid()));
-        payBtn.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                makePayment();
-            }
-        });
+        payBtn.setOnClickListener(view -> makePayment());
+
+        getSupportActionBar().setTitle("Make Payment");
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        getSupportActionBar().setHomeButtonEnabled(true);
     }
 
     @Override
@@ -85,33 +86,56 @@ public class PayInvestmentActivity extends AppCompatActivity {
         }
     }
 
+    @Override
+    public boolean onSupportNavigateUp() {
+        onBackPressed();
+        return super.onSupportNavigateUp();
+    }
+
     private boolean verifyInput() {
-        if (TextUtils.isEmpty(cardNumberEt.getText().toString())) {
-            return false;
-        } else if (TextUtils.isEmpty(cvvEt.getText().toString())) {
-            return false;
-        } else if (TextUtils.isEmpty(expiryEt.getText().toString()) && expiryEt.getText().length() <4) {
-            return false;
+        sbError = new StringBuilder("The following fields have not been filled: ");
+        boolean cardValid = true, cvvValid = true, expValid = true;
+        if (TextUtils.isEmpty(cardNumberEt.getText().toString().trim())) {
+            cardValid = false;
+            sbError.append("Card number, ");
+        }
+        if (TextUtils.isEmpty(cvvEt.getText().toString().trim())) {
+            cvvValid = false;
+            sbError.append("CVV, ");
+        }
+        if (TextUtils.isEmpty(expiryEt.getText().toString()) || expiryEt.getText().length() <5) {
+            expValid = false;
+            sbError.append("Expiry Date, ");
         }
 
-        String cardnumber = cardNumberEt.getText().toString().trim();
-        int expiryMonth = Integer.parseInt(expiryEt.getText().toString().trim().substring(0,1));
-        int expiryYear = Integer.parseInt(expiryEt.getText().toString().trim().substring(2,3));
-        String cvv = cvvEt.getText().toString().trim();
-        Card card = new Card(cardnumber, expiryMonth, expiryYear, cvv);
-
-        if (card.isValid()) {
-            return true;
-        } else {
-            Toast.makeText(this, "Card is not valid", Toast.LENGTH_SHORT).show();;
-            return false;
-        }
+        return cardValid && cvvValid && expValid;
     }
 
     private void makePayment() {
-        if (true) {
-            dialog.show();
-            performCharge(getTestCard());
+        if (!tasks.checkNetworkStatus(this)) {
+            tasks.makeSnackbar(layout, "There is no Internet connection");
+            return;
+        }
+
+        if (verifyInput()) {
+            String cardNumString = cardNumberEt.getText().toString().trim();
+            int month = Integer.parseInt(expiryEt.getText().toString().trim().substring(0, 2));
+            int year = 2000 + Integer.parseInt(expiryEt.getText().toString().trim().substring(3,5));
+            String cvv = cvvEt.getText().toString().trim();
+            Log.d("cardValidity", "Card number: " + cardNumString);
+            Log.d("cardValidity", "Expiry month: " + month);
+            Log.d("cardValidity", "Expiry year: " + year);
+            Log.d("cardValidity", "Card cvv: " + cvv);
+            Card tempCard = new Card(cardNumString, month, year, cvv);
+            if (tempCard.isValid()) {
+                dialog.show();
+                performCharge(tempCard);
+            } else {
+                Toast.makeText(this, "Card is not valid", Toast.LENGTH_LONG).show();
+                Log.d("cardValidity", "Card ain't valid");
+            }
+        } else {
+            tasks.displayAlertDialog(PayInvestmentActivity.this,"", sbError.toString());
         }
     }
 
@@ -130,14 +154,18 @@ public class PayInvestmentActivity extends AppCompatActivity {
 
             @Override
             public void beforeValidate(Transaction transaction) {
-
+                trans.setReference(transaction.getReference());
             }
 
             @Override
             public void onError(Throwable error, Transaction transaction) {
+                Log.d("charge_card_error", error.toString());
                 trans.setReference(transaction.getReference());
                 dialog.dismiss();
-                Toast.makeText(PayInvestmentActivity.this, "Error: " + error.getMessage(), Toast.LENGTH_SHORT).show();
+                tasks.displayAlertDialog(PayInvestmentActivity.this,"Charge Error", "Error: " + error.getClass().getSimpleName());
+                if (transaction.getReference() != null) {
+                    Log.d("onChargeError", transaction.getReference());
+                }
             }
         });
     }
@@ -173,7 +201,7 @@ public class PayInvestmentActivity extends AppCompatActivity {
 
     private void formatInputs() {
         cardNumberEt.addTextChangedListener(new TextFormatters.CardTextWatcher());
-        cvvEt.addTextChangedListener(new TextFormatters.ExpiryDateTextWatcher());
+        expiryEt.addTextChangedListener(new TextFormatters.ExpiryDateTextWatcher());
     }
 
     private class VerifyOnServer extends AsyncTask<String, Void, String> {
@@ -189,7 +217,8 @@ public class PayInvestmentActivity extends AppCompatActivity {
                 trans.setTransactionStatus("Successful");
                 sendTransactionToDatabase();
             } else {
-                Toast.makeText(PayInvestmentActivity.this, "Sorry payment failed", Toast.LENGTH_SHORT).show();
+                Log.d("error", error);
+                Toast.makeText(PayInvestmentActivity.this, error, Toast.LENGTH_SHORT).show();
                 trans.setTransactionStatus("Failed");
                 sendTransactionToDatabase();
                 dialog.dismiss();
@@ -205,7 +234,7 @@ public class PayInvestmentActivity extends AppCompatActivity {
         protected String doInBackground(String... reference) {
             try {
                 this.reference = reference[0];
-                URL url = new URL(backend_url + "/verify/" + this.reference);
+                URL url = new URL(backend_live_url + "/verify/" + this.reference);
                 BufferedReader in = new BufferedReader(
                         new InputStreamReader(
                                 url.openStream()));
@@ -216,6 +245,7 @@ public class PayInvestmentActivity extends AppCompatActivity {
                 return inputLine;
             } catch (Exception e) {
                 error = e.getClass().getSimpleName() + ": " + e.getMessage();
+                Log.d("verify_trans_error", error);
             }
             return null;
         }

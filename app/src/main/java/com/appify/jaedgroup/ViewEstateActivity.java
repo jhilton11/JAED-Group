@@ -101,15 +101,17 @@ public class ViewEstateActivity extends AppCompatActivity {
         estateRef.addSnapshotListener(new EventListener<QuerySnapshot>() {
             @Override
             public void onEvent(@Nullable QuerySnapshot queryDocumentSnapshots, @Nullable FirebaseFirestoreException e) {
-                estateImages = new ArrayList<>();
-                for (DocumentSnapshot snapshot: queryDocumentSnapshots.getDocuments()) {
-                    EstateImage item = snapshot.toObject(EstateImage.class);
-                    estateImages.add(item);
-                    Log.d("imgUrl", item.getImageUrl());
+                if (e == null) {
+                    estateImages = new ArrayList<>();
+                    for (DocumentSnapshot snapshot: queryDocumentSnapshots.getDocuments()) {
+                        EstateImage item = snapshot.toObject(EstateImage.class);
+                        estateImages.add(item);
+                        Log.d("imgUrl", item.getImageUrl());
+                    }
+                    ImageAdapter pageAdapter = new ImageAdapter(estateImages, getApplicationContext());
+                    viewPager.setAdapter(pageAdapter);
+                    indicator.setViewPager(viewPager);
                 }
-                ImageAdapter pageAdapter = new ImageAdapter(estateImages, getApplicationContext());
-                viewPager.setAdapter(pageAdapter);
-                indicator.setViewPager(viewPager);
             }
         });
     }

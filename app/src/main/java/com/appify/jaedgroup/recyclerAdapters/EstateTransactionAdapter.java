@@ -8,6 +8,8 @@ import android.widget.TextView;
 
 import com.appify.jaedgroup.R;
 import com.appify.jaedgroup.model.EstateTransaction;
+import com.appify.jaedgroup.utils.Constants;
+import com.appify.jaedgroup.utils.tasks;
 
 import java.util.ArrayList;
 
@@ -37,11 +39,12 @@ public class EstateTransactionAdapter extends RecyclerView.Adapter<EstateTransac
         EstateTransaction transaction = transactions.get(position);
 
         holder.estate_name.setText(transaction.getEstateName());
-        holder.priceTv.setText(String.valueOf(transaction.getAmountPaid()));
+        holder.priceTv.setText(Constants.NAIRA + tasks.getCurrencyString(transaction.getAmountPaid() / 100));
         if (transaction.getDatePaid() != null) {
-            holder.dateTv.setText("Date:: " + transaction.getDatePaid());
+            holder.dateTv.setText(transaction.getDatePaidString());
         }
-        holder.nameTv.setText(transaction.getName());
+        holder.typeTv.setText(transaction.getEstateType());
+
     }
 
     @Override
@@ -50,14 +53,14 @@ public class EstateTransactionAdapter extends RecyclerView.Adapter<EstateTransac
     }
 
     public static class Holder extends RecyclerView.ViewHolder {
-        TextView nameTv, dateTv, priceTv, estate_name;
+        TextView typeTv, dateTv, priceTv, estate_name;
         public Holder(@NonNull View itemView) {
             super(itemView);
 
-            nameTv = itemView.findViewById(R.id.person_name);
-            dateTv = itemView.findViewById(R.id.purchase_date);
+            dateTv = itemView.findViewById(R.id.transaction_date);
             priceTv = itemView.findViewById(R.id.estate_price);
             estate_name = itemView.findViewById(R.id.estate_name);
+            typeTv = itemView.findViewById(R.id.estate_type);
         }
     }
 }

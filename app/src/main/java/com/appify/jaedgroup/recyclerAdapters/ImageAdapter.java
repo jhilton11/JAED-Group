@@ -27,7 +27,8 @@ public class ImageAdapter extends PagerAdapter {
     @Override
     public Object instantiateItem(@NonNull ViewGroup container, int position) {
         ImageView imageView = new ImageView(context);
-        imageView.setScaleType(ImageView.ScaleType.CENTER_CROP);
+        imageView.setScaleType(ImageView.ScaleType.CENTER_INSIDE);
+        imageView.setAdjustViewBounds(true);
         Glide.with(context).load(items.get(position).getImageUrl()).placeholder(R.drawable.background).into(imageView);
         container.addView(imageView);
         return imageView;

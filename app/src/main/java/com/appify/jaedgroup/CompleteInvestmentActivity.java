@@ -4,6 +4,7 @@ import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 import androidx.core.location.LocationManagerCompat;
+import co.paystack.android.PaystackSdk;
 
 import android.Manifest;
 import android.content.Intent;
@@ -44,6 +45,7 @@ public class CompleteInvestmentActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_complete_investment);
 
+        PaystackSdk.setPublicKey("pk_live_f905fcf049c9b17effe6dac3dde77e7ad70d4e40");
         totalTv = findViewById(R.id.total_tv);
         infoTv = findViewById(R.id.info_tv);
         amountTv = findViewById(R.id.amount_et);
@@ -57,7 +59,11 @@ public class CompleteInvestmentActivity extends AppCompatActivity {
         payBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                makePayment();
+                if (amountTv.getText().toString().trim().length()>0) {
+                    makePayment();
+                } else {
+                    tasks.displayAlertDialog(CompleteInvestmentActivity.this, "", "Pls enter an amount");
+                }
             }
         });
 
@@ -81,6 +87,16 @@ public class CompleteInvestmentActivity extends AppCompatActivity {
                 }
             }
         });
+
+        getSupportActionBar().setTitle("");
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        getSupportActionBar().setHomeButtonEnabled(true);
+    }
+
+    @Override
+    public boolean onSupportNavigateUp() {
+        onBackPressed();
+        return super.onSupportNavigateUp();
     }
 
     private void makePayment() {

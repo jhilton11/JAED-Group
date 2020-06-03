@@ -1,11 +1,9 @@
 package com.appify.jaedgroup.model;
 
-import com.google.firebase.database.ServerValue;
+import com.google.firebase.Timestamp;
 import com.google.firebase.firestore.Exclude;
 
 import java.io.Serializable;
-import java.lang.reflect.Field;
-import java.util.HashMap;
 
 public class InvestmentTransaction implements Serializable {
     private String id;
@@ -27,16 +25,9 @@ public class InvestmentTransaction implements Serializable {
     private boolean isReady;
     private String maturityDate;
     private String transactionStatus;
-    private HashMap<String, Object> datePaidObj;
+    private Timestamp datePaidSt;
 
     public InvestmentTransaction() {
-    }
-
-    public InvestmentTransaction(String userId) {
-        this.userId = userId;
-        HashMap<String, Object> object = new HashMap<>();
-        object.put("date", ServerValue.TIMESTAMP);
-        datePaidObj = object;
     }
 
     public String getId() {
@@ -119,11 +110,6 @@ public class InvestmentTransaction implements Serializable {
         this.datePaid = datePaid;
     }
 
-    @Exclude
-    public long getDatePaidLong() {
-        return (long) datePaidObj.get("date");
-    }
-
     public String getReference() {
         return reference;
     }
@@ -196,7 +182,12 @@ public class InvestmentTransaction implements Serializable {
         this.transactionStatus = transactionStatus;
     }
 
-    public HashMap<String, Object> getDatePaidObj() {
-        return datePaidObj;
+    public Object getDatePaidSt() {
+        return Timestamp.now();
+    }
+
+    @Exclude
+    public String getDatePaidString() {
+        return datePaidSt.toDate().toString();
     }
 }

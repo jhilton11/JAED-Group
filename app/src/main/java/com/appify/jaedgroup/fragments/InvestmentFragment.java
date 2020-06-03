@@ -136,7 +136,7 @@ public class InvestmentFragment extends Fragment {
         final Handler handler = new Handler();
         final Runnable Update = new Runnable() {
             public void run() {
-                if (currentPage == NUM_PAGES-1) {
+                if (currentPage == NUM_PAGES) {
                     currentPage = 0;
                 }
                 viewPager.setCurrentItem(currentPage++, true);

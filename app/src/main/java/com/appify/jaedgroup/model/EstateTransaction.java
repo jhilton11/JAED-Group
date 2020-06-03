@@ -1,5 +1,8 @@
 package com.appify.jaedgroup.model;
 
+import com.google.firebase.Timestamp;
+import com.google.firebase.firestore.Exclude;
+
 import java.io.Serializable;
 
 public class EstateTransaction implements Serializable {
@@ -20,11 +23,11 @@ public class EstateTransaction implements Serializable {
     private int amountPaid;
     private boolean willAcceptAlternatePlot;
     private String estateType;
-    private String datePaid;
     private String reference;
     private String email;
     private String userId;
     private String transactionStatus;
+    private Timestamp datePaid;
 
     public EstateTransaction() {
     }
@@ -45,6 +48,7 @@ public class EstateTransaction implements Serializable {
         this.willAcceptAlternatePlot = willAcceptAlternatePlot;
         this.email = email;
         this.userId = userId;
+        //this.datePaid = Timestamp.now();
     }
 
     public String getId() {
@@ -117,14 +121,6 @@ public class EstateTransaction implements Serializable {
 
     public void setEstateType(String estateType) {
         this.estateType = estateType;
-    }
-
-    public String getDatePaid() {
-        return datePaid;
-    }
-
-    public void setDatePaid(String datePaid) {
-        this.datePaid = datePaid;
     }
 
     public String getReference() {
@@ -221,5 +217,14 @@ public class EstateTransaction implements Serializable {
 
     public void setWillAcceptAlternatePlot(boolean willAcceptAlternatePlot) {
         this.willAcceptAlternatePlot = willAcceptAlternatePlot;
+    }
+
+    public Object getDatePaid() {
+        return Timestamp.now();
+    }
+
+    @Exclude
+    public String getDatePaidString() {
+        return datePaid.toDate().toString();
     }
 }

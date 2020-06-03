@@ -68,7 +68,7 @@
             app:layout_constraintLeft_toLeftOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/nextOfKin_et"
             android:layout_marginTop="10dp"
-            android:inputType="phone"
+            android:inputType="textPostalAddress"
             android:hint="Address of next of kin"/>
 
         <TextView

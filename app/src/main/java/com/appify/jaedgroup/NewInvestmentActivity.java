@@ -42,7 +42,7 @@ public class NewInvestmentActivity extends AppCompatActivity {
         genderRg = findViewById(R.id.genderRG);
         proceedBtn = findViewById(R.id.button_next);
 
-        tasks.displayAlertDialog(this, "Disclaimer", "This is a disclaimer");
+        //tasks.displayAlertDialog(this, "Disclaimer", "This is a disclaimer");
 
         proceedBtn.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -50,10 +50,20 @@ public class NewInvestmentActivity extends AppCompatActivity {
                 proceed();
             }
         });
+
+        getSupportActionBar().setTitle("Enter your details");
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        getSupportActionBar().setHomeButtonEnabled(true);
+    }
+
+    @Override
+    public boolean onSupportNavigateUp() {
+        onBackPressed();
+        return super.onSupportNavigateUp();
     }
 
     private boolean getDetails() {
-        transaction = new InvestmentTransaction(FirebaseAuth.getInstance().getCurrentUser().getUid());
+        transaction = new InvestmentTransaction();
 
         if (TextUtils.isEmpty(nameEt.getText().toString())) {
             tasks.makeSnackbar(layout, "Name field is empty");
